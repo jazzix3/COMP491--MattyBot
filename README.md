@@ -22,3 +22,25 @@ For new student members on the CSUN Esports club Discord server who need help na
 - Commands for Mattybot to check statistics from a certain game such as:
   - !rank to show user's current rank
   - !playtime to show user's total hours played
+
+
+## Requirements
+- Set up a virtual environment:
+```
+python3 -m venv venv
+```
+- Activate the virtual environment:
+```
+source venv/bin/activate
+```
+
+- Install libraries:
+```
+pip install discord
+pip install dotenv
+```
+
+- Create a new file named `.env`, and include your bot token in the contents. It should be formatted like this:
+```
+DISCORD_BOT_TOKEN=yourbottokengoeshere
+```

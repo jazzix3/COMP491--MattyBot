@@ -1,0 +1,5 @@
+.env
+venv
+__pycache__
+faq_db.sqlite
+save.py
