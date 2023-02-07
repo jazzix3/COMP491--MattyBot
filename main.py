@@ -85,7 +85,6 @@ class AddEventModal(discord.ui.Modal, title='Add an Event'):
       embed.add_field(name="Location", value=f'{self.location}', inline=False)
       embed.add_field(name="Description", value=f'{self.description}', inline=False)
       
-      
       await interaction.response.send_message(embed=embed, ephemeral=True)
       db.close()
 
@@ -100,15 +99,22 @@ client = Client()
 async def addfaq(interaction: discord.Interaction):
     await interaction.response.send_modal(AddFaqModal())
 
-@client.tree.command(name="listfaq", description="View a list of all FAQ")
+@client.tree.command(name="listfaq", description="View a list of all FAQs")
 async def listfaq(interaction:discord.Interaction):
   db = sqlite3.connect('db.sqlite')
   cursor = db.cursor()
   cursor.execute('''
     SELECT questions FROM faq_db
       ''')
-  result = cursor.fetchall()
-  await interaction.response.send_message(f'{result}', ephemeral=True)
+  embed = discord.Embed(title="List of all FAQ", description="To ask a question, -- **directions to do something** --", color = discord.Color.blue())
+  rows = cursor.fetchall()
+  count = 1
+  for row in rows:
+    question = row[0]
+    embed.add_field(name=f'{count}- {question}', value='\n', inline= False)
+    count += 1
+  
+  await interaction.response.send_message(embed=embed, ephemeral=True)
   db.commit()
   db.close()
 
@@ -124,20 +130,17 @@ async def listevents(interaction:discord.Interaction):
   cursor.execute('''
     SELECT name, date, time FROM events_db
       ''')
-  
   embed = discord.Embed(title="List of all events", description="For more information about an event, -- **directions to do something** --", color = discord.Color.blue())
   rows = cursor.fetchall()
-  count = 0
+  count = 1
   for row in rows:
     name = row[0]
     date = row[1]
     time = row[2]
     embed.add_field(name=f'{count}- {name}', value=f'{date} at {time}', inline= False)
     count += 1
-
   
   await interaction.response.send_message(embed=embed, ephemeral=True)
-    
   db.commit()
   db.close()
 
