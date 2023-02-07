@@ -123,6 +123,7 @@ async def listfaq(interaction:discord.Interaction):
 async def addevent(interaction: discord.Interaction):
     await interaction.response.send_modal(AddEventModal())
 
+
 @client.tree.command(name="listevents", description="View a list of all Events")
 async def listevents(interaction:discord.Interaction):
   db = sqlite3.connect('db.sqlite')
@@ -145,6 +146,30 @@ async def listevents(interaction:discord.Interaction):
   db.close()
 
 
+@client.tree.command(name="deleteallfaq", description="Delete all FAQ from the database")
+async def deleteallfaq(interaction: discord.Interaction):
+  db = sqlite3.connect('db.sqlite')
+  cursor = db.cursor()
+  cursor.execute('''
+    DELETE FROM faq_db
+      ''')
+  
+  await interaction.response.send_message("Done! All FAQs have been cleared from the database")
+  db.commit()
+  db.close()
+
+
+@client.tree.command(name="deleteallevents", description="Delete all events from the database")
+async def deleteallevents(interaction: discord.Interaction):
+  db = sqlite3.connect('db.sqlite')
+  cursor = db.cursor()
+  cursor.execute('''
+    DELETE FROM events_db
+      ''')
+  
+  await interaction.response.send_message("Done! All events have been cleared from the database")
+  db.commit()
+  db.close()
 
 client.run(TOKEN)
 
