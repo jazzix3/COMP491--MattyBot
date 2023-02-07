@@ -79,9 +79,9 @@ class AddEventModal(discord.ui.Modal, title='Add an Event'):
       db.commit()
    
       embed = discord.Embed(title="Success! A new event has been added.", description="Here are the details:", color = discord.Color.green())
-      embed.add_field(name="Name of Event:", value=f'{self.name}', inline=False)
-      embed.add_field(name="Start date:", value=f'{self.date}', inline=True)
-      embed.add_field(name="Start time:", value=f'{self.time}', inline=True)
+      embed.add_field(name="Name of Event", value=f'{self.name}', inline=False)
+      embed.add_field(name="Start date", value=f'{self.date}', inline=True)
+      embed.add_field(name="Start time", value=f'{self.time}', inline=True)
       embed.add_field(name="Location", value=f'{self.location}', inline=False)
       embed.add_field(name="Description", value=f'{self.description}', inline=False)
       
@@ -122,10 +122,22 @@ async def listevents(interaction:discord.Interaction):
   db = sqlite3.connect('db.sqlite')
   cursor = db.cursor()
   cursor.execute('''
-    SELECT name FROM events_db
+    SELECT name, date, time FROM events_db
       ''')
-  result = cursor.fetchall()
-  await interaction.response.send_message(f'{result}', ephemeral=True)
+  
+  embed = discord.Embed(title="List of all events", description="For more information about an event, -- **directions to do something** --", color = discord.Color.blue())
+  rows = cursor.fetchall()
+  count = 0
+  for row in rows:
+    name = row[0]
+    date = row[1]
+    time = row[2]
+    embed.add_field(name=f'{count}- {name}', value=f'{date} at {time}', inline= False)
+    count += 1
+
+  
+  await interaction.response.send_message(embed=embed, ephemeral=True)
+    
   db.commit()
   db.close()
 
