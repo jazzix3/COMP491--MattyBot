@@ -24,3 +24,4 @@ class SelectView(discord.ui.View):
      def __init__(self, *, timeout = 180):
          super().__init__(timeout=timeout)
          self.add_item(Select())
+
