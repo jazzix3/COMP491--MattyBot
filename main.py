@@ -10,9 +10,12 @@ dotenv.load_dotenv()
 TOKEN = os.getenv('DISCORD_BOT_TOKEN')
 
 
+
+
 class Client(discord.Client):
   def __init__(self) -> None:
       intents = discord.Intents.default()
+      intents.message_content = True
       super().__init__(command_prefix='!', intents=intents) 
       self.tree = app_commands.CommandTree(self) # Enables slash commands
 
@@ -99,7 +102,7 @@ client = Client()
 async def addfaq(interaction: discord.Interaction):
     await interaction.response.send_modal(AddFaqModal())
 
-@client.tree.command(name="listfaq", description="View a list of all FAQs")
+@client.tree.command(name="listfaq", description="View a list of all FAQ")
 async def listfaq(interaction:discord.Interaction):
   db = sqlite3.connect('db.sqlite')
   cursor = db.cursor()
@@ -146,6 +149,28 @@ async def listevents(interaction:discord.Interaction):
   db.close()
 
 
+
+
+@client.tree.command(name="listanswers", description="View a list of all answers from FAQ")
+async def listanswers(interaction:discord.Interaction):
+  db = sqlite3.connect('db.sqlite')
+  cursor = db.cursor()
+  cursor.execute('''
+    SELECT answers FROM faq_db
+      ''')
+  embed = discord.Embed(title="List of all answers", description="Answers to the FAQ", color = discord.Color.blue())
+  rows = cursor.fetchall()
+  count = 1
+  for row in rows:
+    answer = row[0]
+    embed.add_field(name=f'{count}- {answer}', value='\n', inline= False)
+    count += 1
+
+  await interaction.response.send_message(embed=embed, ephemeral=True)
+  db.commit()
+  db.close()
+
+
 @client.tree.command(name="deleteallfaq", description="Delete all FAQ from the database")
 async def deleteallfaq(interaction: discord.Interaction):
   db = sqlite3.connect('db.sqlite')
@@ -153,8 +178,7 @@ async def deleteallfaq(interaction: discord.Interaction):
   cursor.execute('''
     DELETE FROM faq_db
       ''')
-  
-  await interaction.response.send_message("Done! All FAQs have been cleared from the database")
+  await interaction.response.send_message("Done! All FAQ have been cleared from the database")
   db.commit()
   db.close()
 
@@ -165,11 +189,53 @@ async def deleteallevents(interaction: discord.Interaction):
   cursor = db.cursor()
   cursor.execute('''
     DELETE FROM events_db
-      ''')
-  
+      ''')  
   await interaction.response.send_message("Done! All events have been cleared from the database")
   db.commit()
   db.close()
+
+
+@client.tree.command(name="deletefaq", description = "Delete a FAQ from the database")
+async def deletefaq(interaction: discord.Interaction):
+  db = sqlite3.connect('db.sqlite')
+  cursor = db.cursor()
+  cursor.execute('''
+    SELECT questions FROM faq_db
+      ''')
+  embed = discord.Embed(title="Delete a FAQ", description="Enter the number of the FAQ to delete", color = discord.Color.blue())
+  rows = cursor.fetchall()
+  count = 1
+  for row in rows:
+    question = row[0]
+    embed.add_field(name=f'{count}- {question}', value='\n', inline= False)
+    count += 1
+  await interaction.response.send_message(embed=embed)
+
+  def check(m):
+      return m.author == interaction.user and m.channel == interaction.channel
+
+  selection = await client.wait_for('message', check=check)
+  selected_index = int(selection.content) - 1
+  selected_row = rows[selected_index]
+  cursor.execute('''DELETE FROM faq_db WHERE questions=?''', (selected_row[0],))
+  
+  await interaction.channel.send(f"Done! You deleted FAQ #{int(selection.content)}.")
+  db.commit()
+  db.close()
+  
+
+
+
+  
+
+
+
+
+
+    
+
+
+
 
 client.run(TOKEN)
 
