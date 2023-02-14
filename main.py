@@ -99,6 +99,10 @@ class AddEventModal(discord.ui.Modal, title='Add an Event'):
       await interaction.response.send_message('Oops! Something went wrong.', ephemeral=True)
 
 
+
+
+
+
 client = Client()
 
 
@@ -267,6 +271,39 @@ async def deleteevent(interaction: discord.Interaction):
   await interaction.followup.send(embed=embed2, ephemeral=True)
   db.commit()
   db.close() 
+
+
+### FAQ SELECT MENU ###
+
+class SelectMenu(discord.ui.Select):
+  def __init__(self):
+    db = sqlite3.connect('db.sqlite')
+    cursor = db.cursor()
+    cursor.execute('''
+      SELECT questions FROM faq_db
+      ''')
+    rows = cursor.fetchall()
+    options = [discord.SelectOption(label=row[0]) for row in rows]
+
+    super().__init__(placeholder="Select a question to view the answer",options=options)
+
+  # Need to figure out how to view answer from database when option is selected
+  async def callback(self, interaction: discord.Interaction):
+    if self.values[0] == "Hello!": 
+      await interaction.response.send_message(content="Hello there!!!",ephemeral=False)
+
+      
+class SelectView(discord.ui.View):
+     def __init__(self, *, timeout = 180):
+         super().__init__(timeout=timeout)
+         self.add_item(SelectMenu())
+
+
+@client.tree.command(name="viewfaq", description="View menu of FAQ")
+async def viewfaq(interaction: discord.Interaction):
+  await interaction.response.send_message(view = SelectView() )
+
+
 
 
 client.run(TOKEN)
