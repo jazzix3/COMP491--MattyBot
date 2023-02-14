@@ -312,13 +312,16 @@ class FaqSelectMenu(discord.ui.Select):
     cursor.execute('''
       SELECT answers, creator, datecreated FROM faq_db WHERE questions = ?''', [(self.values[0])])
     selected_answer = cursor.fetchone()
+    answer = selected_answer[0]
+    creator = selected_answer[1]
+    datecreated = selected_answer[2]
     db.close()
 
     if selected_answer:
-      embed = discord.Embed(title=f"{selected_answer[0]}", description="", color = discord.Color.yellow())
+      embed = discord.Embed(title=f"{answer}", description="", color = discord.Color.yellow())
       embed.add_field(name=" ", value=" ", inline=False)
       embed.add_field(name=" ", value=" ", inline=False)
-      embed.set_footer(text=f"Created by {selected_answer[1]} on {selected_answer[2]}")
+      embed.set_footer(text=f"Created by {creator} on {datecreated}")
       await interaction.response.send_message(embed=embed, ephemeral=True)
     else:
       await interaction.response.send_message(content="Oops! Something went wrong",ephemeral=True) 
@@ -357,13 +360,15 @@ class EventSelectMenu(discord.ui.Select):
     db = sqlite3.connect('db.sqlite')
     cursor = db.cursor()
     cursor.execute('''
-      SELECT name, date, time, location, description FROM events_db WHERE name = ?''', [(self.values[0])])
+      SELECT name, date, time, location, description, creator, datecreated FROM events_db WHERE name = ?''', [(self.values[0])])
     selected_event = cursor.fetchone()
     name = selected_event[0]
     date = selected_event[1]
     time = selected_event[2]
     location = selected_event[3]
     description = selected_event[4]
+    creator = selected_event[5]
+    datecreated = selected_event[6]
     
 
     if selected_event:
@@ -373,6 +378,9 @@ class EventSelectMenu(discord.ui.Select):
       embed.add_field(name="Attending ✅ ", value=" ", inline = True)
       embed.add_field(name="Can't Go ❌", value=" ", inline = True)
       embed.add_field(name="Maybe ❔", value=" ", inline = True)
+      embed.add_field(name=" ", value=" ", inline=False)
+      embed.add_field(name=" ", value=" ", inline=False)
+      embed.set_footer(text=f"Created by {creator} on {datecreated}")
       await interaction.response.send_message(embed=embed, ephemeral=True)
       db.close()
     else:
