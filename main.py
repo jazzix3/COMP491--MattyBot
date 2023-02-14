@@ -273,8 +273,8 @@ async def deleteevent(interaction: discord.Interaction):
   db.close() 
 
 
-### FAQ SELECT MENU ###
 
+### FAQ SELECT MENU ###
 class SelectMenu(discord.ui.Select):
   def __init__(self):
     db = sqlite3.connect('db.sqlite')
@@ -284,13 +284,23 @@ class SelectMenu(discord.ui.Select):
       ''')
     rows = cursor.fetchall()
     options = [discord.SelectOption(label=row[0]) for row in rows]
-
     super().__init__(placeholder="Select a question to view the answer",options=options)
+    db.close()
 
-  # Need to figure out how to view answer from database when option is selected
+
   async def callback(self, interaction: discord.Interaction):
-    if self.values[0] == "Hello!": 
-      await interaction.response.send_message(content="Hello there!!!",ephemeral=False)
+    db = sqlite3.connect('db.sqlite')
+    cursor = db.cursor()
+    cursor.execute('''
+      SELECT answers FROM faq_db WHERE questions = ?''', [(self.values[0])])
+    answer = cursor.fetchone()
+    db.close()
+
+    if answer: 
+      embed = discord.Embed(title=f"{answer[0]}", description="", color = discord.Color.green())
+      await interaction.response.send_message(embed=embed, ephemeral=True)
+    else:
+      await interaction.response.send_message(content="Oops! Something went wrong",ephemeral=False) 
 
       
 class SelectView(discord.ui.View):
