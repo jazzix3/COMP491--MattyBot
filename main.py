@@ -2,8 +2,10 @@ import os
 import discord
 import dotenv
 import sqlite3
+from datetime import datetime
 from discord.ext import commands #maybe remove?
 from discord import ui, app_commands
+
 
 
 dotenv.load_dotenv()
@@ -23,13 +25,15 @@ class Client(discord.Client):
 
   async def on_ready(self):     
     print(f'Successfully logged in as {client.user}') # Prints message in console if online
-    db = sqlite3.connect('db.sqlite') # Establish database connection
+    db = sqlite3.connect('db.sqlite') # Establish database connection and creates tables
     cursor = db.cursor()
     cursor.execute('''
       CREATE TABLE IF NOT EXISTS faq_db(
         id integer PRIMARY KEY AUTOINCREMENT,
         questions TEXT,
-        answers TEXT
+        answers TEXT,
+        creator TEXT,
+        datecreated TEXT
         )
         ''')
     db.commit()
@@ -40,7 +44,9 @@ class Client(discord.Client):
         date TEXT,
         time TEXT,
         location TEXT,
-        description TEXT
+        description TEXT,
+        creator TEXT,
+        datecreated TEXT
         )
         ''')
     db.commit()
@@ -51,10 +57,14 @@ class AddFaqModal(discord.ui.Modal, title='Add to FAQ'):
     answer = discord.ui.TextInput(label="Answer:", style=discord.TextStyle.long, required=True)
 
     async def on_submit(self, interaction: discord.Interaction):
+      creator = interaction.user
+      timestamp = datetime.now()
+      datecreated = timestamp.strftime(f"%m/%d/%Y")
+      
       db = sqlite3.connect('db.sqlite')
       cursor = db.cursor()
-      sql = "INSERT INTO faq_db(questions, answers) VALUES (?, ?)"
-      val = (f'{self.question}', f'{self.answer}')
+      sql = "INSERT INTO faq_db(questions, answers, creator, datecreated) VALUES (?, ?, ?, ?)"
+      val = (f'{self.question}', f'{self.answer}', f'{creator}', f'{datecreated}')
       cursor.execute(sql, val)
       db.commit()
       db.close()
@@ -62,9 +72,11 @@ class AddFaqModal(discord.ui.Modal, title='Add to FAQ'):
       embed = discord.Embed(title="Success! A new FAQ has been added.", description="", color = discord.Color.green())
       embed.add_field(name="Question", value=f'{self.question}', inline=False)
       embed.add_field(name="Answer", value=f'{self.answer}', inline=False)
+      embed.add_field(name=" ", value=" ", inline=False)
+      embed.add_field(name=" ", value=" ", inline=False)
+      embed.set_footer(text=f"Created by {creator} on {datecreated}")
 
       await interaction.response.send_message(embed=embed, ephemeral=True)
-
       
     async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
       await interaction.response.send_message('Oops! Something went wrong.', ephemeral=True)
@@ -78,10 +90,14 @@ class AddEventModal(discord.ui.Modal, title='Add an Event'):
     description = discord.ui.TextInput(label="Description:", style=discord.TextStyle.long, required=True)
 
     async def on_submit(self, interaction: discord.Interaction):
+      creator = interaction.user
+      timestamp = datetime.now()
+      datecreated = timestamp.strftime(f"%m/%d/%Y")
+
       db = sqlite3.connect('db.sqlite')
       cursor = db.cursor()
-      sql = "INSERT INTO events_db(name, date, time, location, description) VALUES (?, ?, ?, ?, ?)"
-      val = (f'{self.name}', f'{self.date}', f'{self.time}', f'{self.location}',f'{self.description}')
+      sql = "INSERT INTO events_db(name, date, time, location, description, creator, datecreated) VALUES (?, ?, ?, ?, ?, ?, ?)"
+      val = (f'{self.name}', f'{self.date}', f'{self.time}', f'{self.location}',f'{self.description}', f'{creator}', f'{datecreated}')
       cursor.execute(sql, val)
       db.commit()
    
@@ -90,7 +106,10 @@ class AddEventModal(discord.ui.Modal, title='Add an Event'):
       embed.add_field(name="Start date", value=f'{self.date}', inline=True)
       embed.add_field(name="Start time", value=f'{self.time}', inline=True)
       embed.add_field(name="Location", value=f'{self.location}', inline=False)
-      embed.add_field(name="Description", value=f'{self.description}', inline=False)
+      embed.add_field(name="Description", value=f'{self.description}\n\n', inline=False)
+      embed.add_field(name=" ", value=" ", inline=False)
+      embed.add_field(name=" ", value=" ", inline=False)
+      embed.set_footer(text=f"Created by {creator} on {datecreated}")
       
       await interaction.response.send_message(embed=embed, ephemeral=True)
       db.close()
@@ -100,10 +119,8 @@ class AddEventModal(discord.ui.Modal, title='Add an Event'):
 
 
 
-
-
-
 client = Client()
+
 
 
 ### FAQ COMMANDS ###
@@ -276,9 +293,6 @@ async def deleteevent(interaction: discord.Interaction):
   
 
 
-
-
-
 ### FAQ SELECT MENU ###
 class FaqSelectMenu(discord.ui.Select):
   def __init__(self):
@@ -296,12 +310,15 @@ class FaqSelectMenu(discord.ui.Select):
     db = sqlite3.connect('db.sqlite')
     cursor = db.cursor()
     cursor.execute('''
-      SELECT answers FROM faq_db WHERE questions = ?''', [(self.values[0])])
-    answer = cursor.fetchone()
+      SELECT answers, creator, datecreated FROM faq_db WHERE questions = ?''', [(self.values[0])])
+    selected_answer = cursor.fetchone()
     db.close()
 
-    if answer:
-      embed = discord.Embed(title=f"{answer[0]}", description="", color = discord.Color.yellow())
+    if selected_answer:
+      embed = discord.Embed(title=f"{selected_answer[0]}", description="", color = discord.Color.yellow())
+      embed.add_field(name=" ", value=" ", inline=False)
+      embed.add_field(name=" ", value=" ", inline=False)
+      embed.set_footer(text=f"Created by {selected_answer[1]} on {selected_answer[2]}")
       await interaction.response.send_message(embed=embed, ephemeral=True)
     else:
       await interaction.response.send_message(content="Oops! Something went wrong",ephemeral=True) 
@@ -353,16 +370,15 @@ class EventSelectMenu(discord.ui.Select):
       embed = discord.Embed(title=f"{name}", description=f"{description}", color = discord.Color.blue())
       embed.add_field(name="When", value=f"{date} at {time}", inline = True)
       embed.add_field(name="Where", value=f"{location}", inline = False)
-      embed.add_field(name="Attending ", value=" ", inline = True)
-      embed.add_field(name="Declined", value=" ", inline = True)
-      embed.add_field(name="Tentative", value=" ", inline = True)
+      embed.add_field(name="Attending ✅ ", value=" ", inline = True)
+      embed.add_field(name="Can't Go ❌", value=" ", inline = True)
+      embed.add_field(name="Maybe ❔", value=" ", inline = True)
       await interaction.response.send_message(embed=embed, ephemeral=True)
       db.close()
     else:
       await interaction.response.send_message(content="Oops! Something went wrong",ephemeral=True) 
       db.close()
 
-      
 class EventSelectView(discord.ui.View):
      def __init__(self, *, timeout = 180):
          super().__init__(timeout=timeout)
@@ -373,6 +389,72 @@ class EventSelectView(discord.ui.View):
 async def viewevents(interaction: discord.Interaction):
   #embed = discord.Embed(title="Events", description="", color = discord.Color.yellow())
   await interaction.response.send_message(view = EventSelectView(), ephemeral=True)
+
+
+
+### SEND EVENT INVITATION COMMAND ###
+# Not functioning yet--- goal is to send an embed to the chat with persistent buttons.
+# Buttons should be labeled "attending", "can't go", and "maybe".
+# When buttons are pressed, the username should be added to the database for that category.
+# Embed should update with list of users according to their selection.
+class EventInviteMenu(discord.ui.Select):
+  def __init__(self):
+    db = sqlite3.connect('db.sqlite')
+    cursor = db.cursor()
+    cursor.execute('''
+      SELECT name FROM events_db
+      ''')
+    rows = cursor.fetchall()
+    options = [discord.SelectOption(label=row[0]) for row in rows]
+    super().__init__(placeholder="Select an event for the invitation",options=options)
+    db.close()
+
+  async def callback(self, interaction: discord.Interaction):
+    db = sqlite3.connect('db.sqlite')
+    cursor = db.cursor()
+    cursor.execute('''
+      SELECT name, date, time, location, description FROM events_db WHERE name = ?''', [(self.values[0])])
+    selected_event = cursor.fetchone()
+    name = selected_event[0]
+    date = selected_event[1]
+    time = selected_event[2]
+    location = selected_event[3]
+    description = selected_event[4]
+    
+
+    if selected_event:
+      embed = discord.Embed(title=f"{name}", description=f"{description}", color = discord.Color.blue())
+      embed.add_field(name="When", value=f"{date} at {time}", inline = True)
+      embed.add_field(name="Where", value=f"{location}", inline = False)
+      embed.add_field(name="Attending ✅ ", value=" ", inline = True)
+      embed.add_field(name="Can't Go ❌", value=" ", inline = True)
+      embed.add_field(name="Maybe ❔", value=" ", inline = True)
+      await interaction.response.send_message(embed=embed, ephemeral=False)
+      db.close()
+    else:
+      await interaction.response.send_message(content="Oops! Something went wrong",ephemeral=True) 
+      db.close()
+
+class EventInviteView(discord.ui.View):
+     def __init__(self, *, timeout = 180):
+         super().__init__(timeout=timeout)
+         self.add_item(EventInviteMenu())
+
+
+@client.tree.command(name="eventinvite", description="Send an invitation for an event")
+async def eventinvite(interaction: discord.Interaction):
+  #embed = discord.Embed(title="Events", description="", color = discord.Color.yellow())
+  await interaction.response.send_message(view = EventInviteView(), ephemeral=True)
+
+
+### Option to bypass interactions and add reaction instead of using buttons
+#@client.tree.command(name="eventinvite", description="Send an event invitation")
+#async def eventinvite(interaction: discord.Interaction):
+#  embed = discord.Embed(title="Events", description="", color = discord.Color.yellow())
+#  message = await interaction.channel.send(embed=embed)
+#  await message.add_reaction('✅')
+#  await message.add_reaction('❌')
+#  await message.add_reaction('❔')
 
 
 
