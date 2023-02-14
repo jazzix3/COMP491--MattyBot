@@ -174,6 +174,7 @@ async def deletefaq(interaction: discord.Interaction):
   cursor.execute('''
     SELECT questions FROM faq_db
       ''')
+  
   embed = discord.Embed(title="Delete a FAQ", description="Enter the number of the FAQ to delete", color = discord.Color.orange())
   rows = cursor.fetchall()
   count = 1
@@ -213,7 +214,7 @@ async def listevents(interaction:discord.Interaction):
   cursor.execute('''
     SELECT name, date, time FROM events_db
       ''')
-  embed = discord.Embed(title="List of all events", description="For more information about an event, -- **directions to do something** --", color = discord.Color.blue())
+  embed = discord.Embed(title="List of all events", description="For more information about an event, type command **/viewevents**", color = discord.Color.blue())
   rows = cursor.fetchall()
   count = 1
   for row in rows:
@@ -272,10 +273,14 @@ async def deleteevent(interaction: discord.Interaction):
   db.commit()
   db.close() 
 
+  
+
+
+
 
 
 ### FAQ SELECT MENU ###
-class SelectMenu(discord.ui.Select):
+class FaqSelectMenu(discord.ui.Select):
   def __init__(self):
     db = sqlite3.connect('db.sqlite')
     cursor = db.cursor()
@@ -287,7 +292,6 @@ class SelectMenu(discord.ui.Select):
     super().__init__(placeholder="Select a question to view the answer",options=options)
     db.close()
 
-
   async def callback(self, interaction: discord.Interaction):
     db = sqlite3.connect('db.sqlite')
     cursor = db.cursor()
@@ -296,22 +300,79 @@ class SelectMenu(discord.ui.Select):
     answer = cursor.fetchone()
     db.close()
 
-    if answer: 
-      embed = discord.Embed(title=f"{answer[0]}", description="", color = discord.Color.green())
+    if answer:
+      embed = discord.Embed(title=f"{answer[0]}", description="", color = discord.Color.yellow())
       await interaction.response.send_message(embed=embed, ephemeral=True)
     else:
-      await interaction.response.send_message(content="Oops! Something went wrong",ephemeral=False) 
+      await interaction.response.send_message(content="Oops! Something went wrong",ephemeral=True) 
 
       
-class SelectView(discord.ui.View):
+class FaqSelectView(discord.ui.View):
      def __init__(self, *, timeout = 180):
          super().__init__(timeout=timeout)
-         self.add_item(SelectMenu())
+         self.add_item(FaqSelectMenu())
 
 
 @client.tree.command(name="viewfaq", description="View menu of FAQ")
 async def viewfaq(interaction: discord.Interaction):
-  await interaction.response.send_message(view = SelectView() )
+  #embed = discord.Embed(title="Frequently Asked Questions", description="", color = discord.Color.yellow())
+  await interaction.response.send_message(view = FaqSelectView(), ephemeral=True)
+
+
+
+
+
+
+  ### EVENTS SELECT MENU ###
+class EventSelectMenu(discord.ui.Select):
+  def __init__(self):
+    db = sqlite3.connect('db.sqlite')
+    cursor = db.cursor()
+    cursor.execute('''
+      SELECT name FROM events_db
+      ''')
+    rows = cursor.fetchall()
+    options = [discord.SelectOption(label=row[0]) for row in rows]
+    super().__init__(placeholder="Select an event to view the event details",options=options)
+    db.close()
+
+  async def callback(self, interaction: discord.Interaction):
+    db = sqlite3.connect('db.sqlite')
+    cursor = db.cursor()
+    cursor.execute('''
+      SELECT name, date, time, location, description FROM events_db WHERE name = ?''', [(self.values[0])])
+    selected_event = cursor.fetchone()
+    name = selected_event[0]
+    date = selected_event[1]
+    time = selected_event[2]
+    location = selected_event[3]
+    description = selected_event[4]
+    
+
+    if selected_event:
+      embed = discord.Embed(title=f"{name}", description=f"{description}", color = discord.Color.blue())
+      embed.add_field(name="When", value=f"{date} at {time}", inline = True)
+      embed.add_field(name="Where", value=f"{location}", inline = False)
+      embed.add_field(name="Attending ", value=" ", inline = True)
+      embed.add_field(name="Declined", value=" ", inline = True)
+      embed.add_field(name="Tentative", value=" ", inline = True)
+      await interaction.response.send_message(embed=embed, ephemeral=True)
+      db.close()
+    else:
+      await interaction.response.send_message(content="Oops! Something went wrong",ephemeral=True) 
+      db.close()
+
+      
+class EventSelectView(discord.ui.View):
+     def __init__(self, *, timeout = 180):
+         super().__init__(timeout=timeout)
+         self.add_item(EventSelectMenu())
+
+
+@client.tree.command(name="viewevents", description="View menu of events")
+async def viewevents(interaction: discord.Interaction):
+  #embed = discord.Embed(title="Events", description="", color = discord.Color.yellow())
+  await interaction.response.send_message(view = EventSelectView(), ephemeral=True)
 
 
 
