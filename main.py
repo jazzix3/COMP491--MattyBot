@@ -432,21 +432,38 @@ class EventInviteMenu(discord.ui.Select):
 
     if selected_event:
       embed = discord.Embed(title=f"{name}", description=f"{description}", color = discord.Color.blue())
-      embed.add_field(name="When", value=f"{date} at {time}", inline = True)
+      embed.add_field(name="When", value=f"{date} at {time}", inline = False)
       embed.add_field(name="Where", value=f"{location}", inline = False)
       embed.add_field(name="Attending ✅ ", value=" ", inline = True)
       embed.add_field(name="Can't Go ❌", value=" ", inline = True)
       embed.add_field(name="Maybe ❔", value=" ", inline = True)
-      await interaction.response.send_message(embed=embed, ephemeral=False)
+      embed.add_field(name=" ", value=" ", inline = False)
+      embed.add_field(name=" ", value=" ", inline = False)
+      embed.add_field(name=" ", value=f"{interaction.user} sent an event invitation. Please RSVP by selecting an option below:", inline = False)
+      await interaction.response.send_message(embed=embed, view= EventInviteButtons(), ephemeral=False)
       db.close()
     else:
-      await interaction.response.send_message(content="Oops! Something went wrong",ephemeral=True) 
+      await interaction.response.send_message(content="Oops! Something went wrong", ephemeral=True) 
       db.close()
 
 class EventInviteView(discord.ui.View):
-     def __init__(self, *, timeout = 180):
-         super().__init__(timeout=timeout)
-         self.add_item(EventInviteMenu())
+  def __init__(self, *, timeout=180):
+    super().__init__(timeout=timeout)
+    self.add_item(EventInviteMenu())
+
+class EventInviteButtons(discord.ui.View):
+    def __init__(self):
+      super().__init__(timeout=None)
+    @discord.ui.button(label="Attending", style=discord.ButtonStyle.green)
+    async def attending(self, interaction:discord.Interaction, Button: discord.ui.Button):
+      pass
+    @discord.ui.button(label="Can't go", style=discord.ButtonStyle.red)
+    async def cantgo(self, interaction:discord.Interaction, Button: discord.ui.Button):
+      pass
+    @discord.ui.button(label="Maybe", style=discord.ButtonStyle.grey)
+    async def maybe(self, interaction:discord.Interaction, Button: discord.ui.Button):
+      pass
+
 
 
 @client.tree.command(name="eventinvite", description="Send an invitation for an event")
