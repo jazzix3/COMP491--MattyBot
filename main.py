@@ -46,7 +46,10 @@ class Client(discord.Client):
         location TEXT,
         description TEXT,
         creator TEXT,
-        datecreated TEXT
+        datecreated TEXT,
+        accepted_users TEXT,
+        declined_users TEXT,
+        tentative_users TEXT
         )
         ''')
     db.commit()
@@ -207,7 +210,9 @@ async def deletefaq(interaction: discord.Interaction):
   selection = await client.wait_for('message', check=check)
   selected_index = int(selection.content) - 1
   selected_row = rows[selected_index]
-  cursor.execute('''DELETE FROM faq_db WHERE questions=?''', (selected_row[0],))
+  cursor.execute('''
+    DELETE FROM faq_db WHERE questions=?
+    ''', (selected_row[0],))
   
   embed2 = discord.Embed(title=f"Success! FAQ #{int(selection.content)}- {question} has been deleted.", description="", color = discord.Color.green())
   await interaction.followup.send(embed=embed2, ephemeral=True)
@@ -283,7 +288,9 @@ async def deleteevent(interaction: discord.Interaction):
   selection = await client.wait_for('message', check=check)
   selected_index = int(selection.content) - 1
   selected_row = rows[selected_index]
-  cursor.execute('''DELETE FROM events_db WHERE name=?''', (selected_row[0],))
+  cursor.execute('''
+    DELETE FROM events_db WHERE name=?
+    ''', (selected_row[0],))
 
   embed2 = discord.Embed(title=f"Success! Event #{int(selection.content)}- {name} has been deleted.", description="", color = discord.Color.green())
   await interaction.followup.send(embed=embed2, ephemeral=True)
@@ -302,27 +309,35 @@ class FaqSelectMenu(discord.ui.Select):
       SELECT questions FROM faq_db
       ''')
     rows = cursor.fetchall()
-    options = [discord.SelectOption(label=row[0]) for row in rows]
+    if rows:
+      options = [discord.SelectOption(label=row[0]) for row in rows]
+    else:
+      options = [discord.SelectOption(label="There are currently no FAQ", value="none")]
     super().__init__(placeholder="Select a question to view the answer",options=options)
     db.close()
 
   async def callback(self, interaction: discord.Interaction):
     db = sqlite3.connect('db.sqlite')
     cursor = db.cursor()
+    if self.values[0] == "none":
+      await interaction.response.defer()
+    db.close()
+    return
     cursor.execute('''
       SELECT answers, creator, datecreated FROM faq_db WHERE questions = ?''', [(self.values[0])])
     selected_answer = cursor.fetchone()
+    question = self.values[0]
     answer = selected_answer[0]
     creator = selected_answer[1]
     datecreated = selected_answer[2]
     db.close()
 
     if selected_answer:
-      embed = discord.Embed(title=f"{answer}", description="", color = discord.Color.yellow())
+      embed = discord.Embed(title=f"{question}", description=f"{answer}", color = discord.Color.yellow())
       embed.add_field(name=" ", value=" ", inline=False)
       embed.add_field(name=" ", value=" ", inline=False)
       embed.set_footer(text=f"Created by {creator} on {datecreated}")
-      await interaction.response.send_message(embed=embed, ephemeral=True)
+      await interaction.response.edit_message(embed=embed)
     else:
       await interaction.response.send_message(content="Oops! Something went wrong",ephemeral=True) 
 
@@ -352,15 +367,26 @@ class EventSelectMenu(discord.ui.Select):
       SELECT name FROM events_db
       ''')
     rows = cursor.fetchall()
-    options = [discord.SelectOption(label=row[0]) for row in rows]
+    if rows :
+      options = [discord.SelectOption(label=row[0]) for row in rows]
+    else:
+      options = [discord.SelectOption(label="There are currently no events", value="none")]
+
+
     super().__init__(placeholder="Select an event to view the event details",options=options)
     db.close()
 
   async def callback(self, interaction: discord.Interaction):
     db = sqlite3.connect('db.sqlite')
     cursor = db.cursor()
+    if self.values[0] == "none":
+        await interaction.response.defer()
+        db.close()
+        return
+    
     cursor.execute('''
-      SELECT name, date, time, location, description, creator, datecreated FROM events_db WHERE name = ?''', [(self.values[0])])
+      SELECT name, date, time, location, description, creator, datecreated FROM events_db WHERE name = ?
+      ''', [(self.values[0])])
     selected_event = cursor.fetchone()
     name = selected_event[0]
     date = selected_event[1]
@@ -381,7 +407,7 @@ class EventSelectMenu(discord.ui.Select):
       embed.add_field(name=" ", value=" ", inline=False)
       embed.add_field(name=" ", value=" ", inline=False)
       embed.set_footer(text=f"Created by {creator} on {datecreated}")
-      await interaction.response.send_message(embed=embed, ephemeral=True)
+      await interaction.response.edit_message(embed=embed)
       db.close()
     else:
       await interaction.response.send_message(content="Oops! Something went wrong",ephemeral=True) 
@@ -395,12 +421,11 @@ class EventSelectView(discord.ui.View):
 
 @client.tree.command(name="viewevents", description="View menu of events")
 async def viewevents(interaction: discord.Interaction):
-  #embed = discord.Embed(title="Events", description="", color = discord.Color.yellow())
   await interaction.response.send_message(view = EventSelectView(), ephemeral=True)
 
 
 
-### SEND EVENT INVITATION COMMAND ###
+  ### SEND EVENT INVITATION COMMAND ###
 # Not functioning yet--- goal is to send an embed to the chat with persistent buttons.
 # Buttons should be labeled "attending", "can't go", and "maybe".
 # When buttons are pressed, the username should be added to the database for that category.
@@ -413,15 +438,23 @@ class EventInviteMenu(discord.ui.Select):
       SELECT name FROM events_db
       ''')
     rows = cursor.fetchall()
-    options = [discord.SelectOption(label=row[0]) for row in rows]
+    if rows:
+      options = [discord.SelectOption(label=row[0]) for row in rows]
+    else:
+      options = [discord.SelectOption(label="There are currently no events", value="none")]
     super().__init__(placeholder="Select an event for the invitation",options=options)
     db.close()
 
   async def callback(self, interaction: discord.Interaction):
     db = sqlite3.connect('db.sqlite')
     cursor = db.cursor()
+    if self.values[0] == "none":
+      await interaction.response.defer()
+      db.close()
+      return
     cursor.execute('''
-      SELECT name, date, time, location, description FROM events_db WHERE name = ?''', [(self.values[0])])
+      SELECT name, date, time, location, description FROM events_db WHERE name = ?
+      ''', [(self.values[0])])
     selected_event = cursor.fetchone()
     name = selected_event[0]
     date = selected_event[1]
@@ -429,7 +462,6 @@ class EventInviteMenu(discord.ui.Select):
     location = selected_event[3]
     description = selected_event[4]
     
-
     if selected_event:
       embed = discord.Embed(title=f"{name}", description=f"{description}", color = discord.Color.blue())
       embed.add_field(name="When", value=f"{date} at {time}", inline = False)
@@ -456,19 +488,27 @@ class EventInviteButtons(discord.ui.View):
       super().__init__(timeout=None)
     @discord.ui.button(label="Attending", style=discord.ButtonStyle.green)
     async def attending(self, interaction:discord.Interaction, Button: discord.ui.Button):
-      pass
+      db = sqlite3.connect('db.sqlite')
+      cursor = db.cursor()
+      cursor.execute('''
+        SELECT name, date, time, location, description FROM events_db WHERE name = ?
+        ''', [(self.values[0])])
+      selected_event = cursor.fetchone()
+    
     @discord.ui.button(label="Can't go", style=discord.ButtonStyle.red)
     async def cantgo(self, interaction:discord.Interaction, Button: discord.ui.Button):
       pass
+    
     @discord.ui.button(label="Maybe", style=discord.ButtonStyle.grey)
     async def maybe(self, interaction:discord.Interaction, Button: discord.ui.Button):
       pass
+    
+   
 
 
 
 @client.tree.command(name="eventinvite", description="Send an invitation for an event")
 async def eventinvite(interaction: discord.Interaction):
-  #embed = discord.Embed(title="Events", description="", color = discord.Color.yellow())
   await interaction.response.send_message(view = EventInviteView(), ephemeral=True)
 
 
@@ -480,6 +520,12 @@ async def eventinvite(interaction: discord.Interaction):
 #  await message.add_reaction('✅')
 #  await message.add_reaction('❌')
 #  await message.add_reaction('❔')
+
+
+
+
+
+
 
 
 
