@@ -140,7 +140,7 @@ async def listanswers(interaction:discord.Interaction):
     db.close()
 
 
-@client.tree.command(name="clearallfaq", description="Delete all FAQ from the database")
+@client.tree.command(name="clearallfaq", description="Clear all FAQ from the database")
 async def clearallfaq(interaction: discord.Interaction):
     db = sqlite3.connect('db.sqlite')
     cursor = db.cursor()
@@ -261,7 +261,7 @@ async def listevents(interaction:discord.Interaction):
     db.close()
 
 
-@client.tree.command(name="clearallevents", description="Delete all events from the database")
+@client.tree.command(name="clearallevents", description="Clear all events from the database")
 async def clearallevents(interaction: discord.Interaction):
     db = sqlite3.connect('db.sqlite')
     cursor = db.cursor()
@@ -274,7 +274,10 @@ async def clearallevents(interaction: discord.Interaction):
     db.commit()
     db.close()
 
-
+### Need to catch error if user input is invalid. 
+# Should we use drop down instead?
+# Or possibly DM user (to prevent user from sending their response message into the channel) 
+# is there a way to hide their response?
 @client.tree.command(name="deleteevent", description = "Delete an event from the database")
 async def deleteevent(interaction: discord.Interaction):
     db = sqlite3.connect('db.sqlite')
@@ -370,8 +373,6 @@ async def viewfaq(interaction: discord.Interaction):
 
 
 
-
-
   ### EVENTS SELECT MENU ###
 class EventSelectMenu(discord.ui.Select):
   def __init__(self):
@@ -385,8 +386,6 @@ class EventSelectMenu(discord.ui.Select):
       options = [discord.SelectOption(label=row[0]) for row in rows]
     else:
       options = [discord.SelectOption(label="There are currently no events", value="none")]
-
-
     super().__init__(placeholder="Select an event to view the event details",options=options)
 
 
@@ -485,7 +484,6 @@ class EventInviteMenu(discord.ui.Select):
       await interaction.response.send_message(embed=embed, view=view, ephemeral=False)
     else:
       await interaction.response.send_message(content="Oops! Something went wrong", ephemeral=True) 
-  
     db.close()
       
 
@@ -528,14 +526,4 @@ async def eventinvite(interaction: discord.Interaction):
 
 
 
-
-
-
-
-
-
-
 client.run(TOKEN)
-
-
-
