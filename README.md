@@ -32,9 +32,12 @@ source venv/bin/activate
 - Install libraries:
 ```
 pip install discord
-pip install dotenv
+pip install python-dotenv
 pip install sqlite
+pip install colorama
 ```
+(Note: You may need to restart your IDE and/or computer to complete installation)
+
 
 - Create a new file named `.env`, and include your bot token in the contents. It should be formatted like this:
 ```
@@ -67,5 +70,3 @@ DISCORD_BOT_TOKEN=yourbottokengoeshere
 `/listevents` - Retrieves a list of all events from the database and creates an embed that displays the names, dates, and times of all events. If there are no events in the database, it sends a message stating that there are none.
 
 `/viewevents` - Displays a dropdown menu of events stored in the database. When a user selects an event from the menu, the event details from the database is populated in an embed. The message includes the event name, date, time, location, description, and creator, and has additional fields for users to indicate if they are attending, not attending, or unsure about the event.
-
-
