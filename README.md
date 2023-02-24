@@ -33,7 +33,6 @@ source venv/bin/activate
 ```
 pip install discord
 pip install python-dotenv
-pip install sqlite
 pip install colorama
 ```
 (Note: You may need to restart your IDE and/or computer to complete installation)
