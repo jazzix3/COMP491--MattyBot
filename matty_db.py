@@ -30,7 +30,7 @@ class Database():
             '''
         create_responses_table = '''
             CREATE TABLE IF NOT EXISTS responses_db(
-            response_id INTEGER PRIMARY KEY,
+            response_id INTEGER PRIMARY KEY AUTOINCREMENT,
             event_id INTEGER NOT NULL,
             username TEXT NOT NULL,
             response TEXT NOT NULL,
@@ -41,17 +41,17 @@ class Database():
         self.query(create_events_table)
         self.query(create_responses_table)
         
-    def query(self, query):
+    def query(self, query, *params):
         db = sqlite3.connect(self.filename)
         cursor = db.cursor()
-        cursor.execute(query)
+        cursor.execute(query, params)
         db.commit()
         db.close()
     
     def query_input(self, query, vals):
         db = sqlite3.connect(self.filename)
         cursor = db.cursor()
-        cursor.execute(query,vals)
+        cursor.execute(query, vals)
         db.commit()
         db.close()
 

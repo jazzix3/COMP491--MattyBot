@@ -10,7 +10,7 @@ class EventInvitation(commands.Cog):
         self.client = client
         self.db = Database()
 
-    @app_commands.command(name="eventinvite", description="View all events")
+    @app_commands.command(name="eventinvite", description="Send an invitation to an event")
     async def eventinvite(self, interaction: Interaction):
         server_id = interaction.guild_id
         await interaction.response.send_message(view=EventInviteView(server_id), ephemeral=True)
@@ -31,11 +31,10 @@ class EventInviteMenu(ui.Select):
         if self.values[0] == "none":
             await interaction.response.defer()
             return
-        selection = self.db.query_fetch('''
-            SELECT event_name, date, time, location, description, creator, datecreated FROM events_db WHERE event_id = ?
-            ''', (self.values[0],))
+        selection = self.db.query_fetch("SELECT event_name, date, time, location, description, creator, datecreated FROM events_db WHERE event_id = ?", (self.values[0],))
         
         if selection:
+            event_id = self.values[0]
             event_name = selection[0][0]
             date = selection[0][1]
             time = selection[0][2]
@@ -54,7 +53,7 @@ class EventInviteMenu(ui.Select):
             embed.add_field(name=" ", value=" ", inline=False)
             embed.add_field(name=" ", value=" ", inline=False)
             embed.set_footer(text=f"Created by {creator} on {datecreated}")
-            view = EventInviteButtons()
+            view = EventInviteButtons(event_id)
             await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
         else:
             await interaction.response.send_message(content="Oops! Something went wrong", ephemeral=True)
@@ -67,21 +66,61 @@ class EventInviteView(ui.View):
          self.add_item(EventInviteMenu(server_id))
 
 class EventInviteButtons(ui.View):
-    def __init__(self, *, timeout=None, db=None):
+    def __init__(self, event_id, *, timeout=None):
         super().__init__(timeout=timeout)
-        self.db = db
+        self.db = Database()
+        self.event_id = event_id
+        
 
     @discord.ui.button(label="Attending", style=discord.ButtonStyle.green)
     async def accepted(self, interaction: Interaction, button: ui.Button):
-        pass
+        username = interaction.user.name
+        response = "accepted"
+        if await self.update_response(username, response):
+            await interaction.response.send_message(content="You are going!", ephemeral=True)
+        else:
+            await interaction.response.send_message(content="Oops! Something went wrong", ephemeral=True)
+
 
     @discord.ui.button(label="Can't Go", style=discord.ButtonStyle.red)
     async def declined(self, interaction: Interaction, button: ui.Button):
-        pass
+        username = interaction.user.name
+        response = "declined"
+        if await self.update_response(username, response):
+            await interaction.response.send_message(content="You are not going.", ephemeral=True)
+        else:
+            await interaction.response.send_message(content="Oops! Something went wrong", ephemeral=True)
 
     @discord.ui.button(label="Maybe", style=discord.ButtonStyle.grey)
     async def tentative(self, interaction: Interaction, button: ui.Button):
-        pass
+        username = interaction.user.name
+        response = "tentative"
+        if await self.update_response(username, response):
+            await interaction.response.send_message(content="You might go.", ephemeral=True)
+        else:
+            await interaction.response.send_message(content="Oops! Something went wrong", ephemeral=True)
+
+
+    async def update_response(self, username, response):
+        # Check if the event_id exists in the events_db table (to make sure foreign keys match)
+        event_check = self.db.query_fetch("SELECT event_id FROM events_db WHERE event_id = ?", (self.event_id,))
+        if not event_check:
+            return False
+        
+        # Check if the user has already responded for this event
+        response_check = self.db.query_fetch("SELECT response_id FROM responses_db WHERE event_id = ? AND username = ?", (self.event_id, username))
+        if response_check:
+            # User has already responded, update the response
+            sql = "UPDATE responses_db SET response = ? WHERE event_id = ? AND username = ?"
+            val = (response, self.event_id, username)
+            self.db.query_input(sql, val)
+        else:
+            # User has not responded yet, insert the response
+            sql = "INSERT INTO responses_db (event_id, username, response) VALUES (?, ?, ?)"
+            val = (self.event_id, username, response)
+            self.db.query_input(sql, val)
+        return True
+
 
 
 
