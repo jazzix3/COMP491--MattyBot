@@ -3,4 +3,5 @@ cog.__pycache__
 venv
 .env
 matty_db.sqlite
-eventinvite_savev1.py
+eventinvite_save.py
+eventinvite_savev2.py

@@ -28,10 +28,17 @@ class EventInviteMenu(ui.Select):
         super().__init__(placeholder="Select an event to view the event details", options=options)
 
     async def callback(self, interaction: Interaction):
+        selection = self.db.query_fetch("SELECT event_name, date, time, location, description, creator, datecreated FROM events_db WHERE event_id = ?", (self.values[0],))
+        accepted_rows = self.db.query_fetch("SELECT COUNT(*) FROM responses_db WHERE event_id = ? AND response = ?" , (self.values[0], 'accepted',))
+        declined_rows = self.db.query_fetch("SELECT COUNT(*) FROM responses_db WHERE event_id = ? AND response = ?" , (self.values[0], 'declined',))
+        tentative_rows = self.db.query_fetch("SELECT COUNT(*) FROM responses_db WHERE event_id = ? AND response = ?" , (self.values[0], 'tentative',))
+        accepted_count = accepted_rows[0][0]
+        declined_count = declined_rows[0][0]
+        tentative_count = tentative_rows[0][0]
+
         if self.values[0] == "none":
             await interaction.response.defer()
             return
-        selection = self.db.query_fetch("SELECT event_name, date, time, location, description, creator, datecreated FROM events_db WHERE event_id = ?", (self.values[0],))
         
         if selection:
             event_id = self.values[0]
@@ -47,23 +54,34 @@ class EventInviteMenu(ui.Select):
             embed.add_field(name="When", value=f"{date} at {time}", inline = True)
             embed.add_field(name="Where", value=location, inline = False)
             embed.add_field(name=" ", value=" ", inline=False)
-            embed.add_field(name="Attending ✅ ", value=" ", inline = True)
-            embed.add_field(name="Can't Go ❌", value=" ", inline = True)
-            embed.add_field(name="Maybe ❔", value=" ", inline = True)
+            embed.add_field(name="Attending ✅ ", value=str(accepted_count), inline = True)
+            embed.add_field(name="Can't Go ❌", value=str(declined_count), inline = True)
+            embed.add_field(name="Maybe ❔", value=str(tentative_count), inline = True)
+            embed.add_field(name=" ", value=" ", inline=False)
             embed.add_field(name=" ", value=" ", inline=False)
             embed.add_field(name=" ", value=" ", inline=False)
             embed.set_footer(text=f"Created by {creator} on {datecreated}")
             view = EventInviteButtons(event_id)
             await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+            
         else:
             await interaction.response.send_message(content="Oops! Something went wrong", ephemeral=True)
+              
+
+
+
+
+
+
 
 
 
 class EventInviteView(ui.View):
-     def __init__(self, server_id, *, timeout = 180):
+    def __init__(self, server_id, *, timeout = 180):
          super().__init__(timeout=timeout)
          self.add_item(EventInviteMenu(server_id))
+
+         
 
 class EventInviteButtons(ui.View):
     def __init__(self, event_id, *, timeout=None):
@@ -120,6 +138,8 @@ class EventInviteButtons(ui.View):
             val = (self.event_id, username, response)
             self.db.query_input(sql, val)
         return True
+    
+    
 
 
 
