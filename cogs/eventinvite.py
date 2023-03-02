@@ -13,19 +13,30 @@ class EventInvitation(commands.Cog):
     @app_commands.command(name="eventinvite", description="Send an invitation to an event")
     async def eventinvite(self, interaction: Interaction):
         server_id = interaction.guild_id
-        await interaction.response.send_message(view=EventInviteView(server_id), ephemeral=True)
+        await interaction.response.send_message(view=EventInviteView(server_id, call='invite'), ephemeral=True)
+
+    @app_commands.command(name="eventresponses", description="View the RSVP responses for an event")
+    async def eventresponses(self, interaction: Interaction):
+        server_id = interaction.guild_id
+        await interaction.response.send_message(view=EventInviteView(server_id, call='responses'), ephemeral=True)
 
 
 
 class EventInviteMenu(ui.Select):
-    def __init__(self, server_id):
+    def __init__(self, server_id, call):
         self.db = Database()
+        self.call = call
         rows = self.db.query_fetch("SELECT event_name, event_id FROM events_db WHERE server_id = ?", (server_id,))
         if rows:
             options = [SelectOption(label=row[0], value=row[1]) for row in rows]
         else:
-            options = [SelectOption(label="There are currently no events", value="none")]        
-        super().__init__(placeholder="Select an event to view the event details", options=options)
+            options = [SelectOption(label="There are currently no events", value="none")]
+
+        if call == 'invite':
+            super().__init__(placeholder="Select an event to send an invitation", options=options)
+        elif call =='responses': 
+            super().__init__(placeholder="Select an event to view its RSVP responses", options=options)        
+
 
     async def callback(self, interaction: Interaction):
         event_id = int(self.values[0])
@@ -34,61 +45,23 @@ class EventInviteMenu(ui.Select):
             await interaction.response.defer()
             return
         
-        else:   
-            embed = EventInviteEmbed(event_id=event_id)
-            view = EventInviteButtons(event_id)
-            await interaction.response.send_message(embed=embed, view=view)
-            self.disabled = True
-            
+        else:
+            if self.call == 'invite':   
+                embed = EventInviteEmbed(event_id=event_id)
+                view = EventInviteButtons(event_id)
+                await interaction.response.send_message(embed=embed, view=view)
+            elif self.call == 'responses':
+                embed = EventResponsesEmbed(event_id=event_id)
+                await interaction.response.edit_message(embed=embed)
 
-
-class EventInviteEmbed(Embed):
-    def __init__(self, event_id):
-        super().__init__()
-        self.db = Database()
-        self.event_id = event_id
-        
-
-        selection = self.db.query_fetch("SELECT event_name, date, time, location, description, creator, datecreated FROM events_db WHERE event_id = ?", (self.event_id,))
-        event_name = selection[0][0]
-        date = selection[0][1]
-        time = selection[0][2]
-        location = selection[0][3]
-        description = selection[0][4]
-        creator = selection[0][5]
-        datecreated = selection[0][6]
-
-        accepted_rows = self.db.query_fetch("SELECT COUNT(*) FROM responses_db WHERE event_id = ? AND response = ?", (self.event_id, 'accepted',))
-        declined_rows = self.db.query_fetch("SELECT COUNT(*) FROM responses_db WHERE event_id = ? AND response = ?", (self.event_id, 'declined',))
-        tentative_rows = self.db.query_fetch("SELECT COUNT(*) FROM responses_db WHERE event_id = ? AND response = ?", (self.event_id, 'tentative',))
-        accepted_count = accepted_rows[0][0]
-        declined_count = declined_rows[0][0]
-        tentative_count = tentative_rows[0][0]
-
-        super().__init__(title=f"You are invited to the event: {event_name}!", description=description, color=Color.blue())
-        self.add_field(name=" ", value=" ", inline=False)
-        self.add_field(name=" ", value=" ", inline=False)
-        self.add_field(name=" ", value=" ", inline=False)
-        self.add_field(name="When", value=f"{date} at {time}", inline=True)
-        self.add_field(name="Where", value=location, inline=True)
-        self.add_field(name=" ", value=" ", inline=False)
-        self.add_field(name=" ", value=" ", inline=False)
-        self.add_field(name="Attending ✅ ", value=str(accepted_count), inline=True)
-        self.add_field(name="Can't Go ❌", value=str(declined_count), inline=True)
-        self.add_field(name="Maybe ❔", value=str(tentative_count), inline=True)
-        self.add_field(name=" ", value=" ", inline=False)
-        self.add_field(name=" ", value=" ", inline=False)
-        self.add_field(name=" ", value=" ", inline=False)
-        self.add_field(name="Please let us know if you can make it by selecting an option below!", value=" ", inline=False)
-        self.set_footer(text=f"Created by {creator} on {datecreated}")
 
 
 class EventInviteView(ui.View):
-    def __init__(self, server_id, *, timeout = None):
+    def __init__(self, server_id, call, *, timeout = None):
          super().__init__(timeout=timeout)
-         self.add_item(EventInviteMenu(server_id))
+         self.add_item(EventInviteMenu(server_id, call))         
 
-         
+
 
 class EventInviteButtons(ui.View):
     def __init__(self, event_id, *, timeout=None):
@@ -159,7 +132,80 @@ class EventInviteButtons(ui.View):
             val = (self.event_id, username, response)
             self.db.query_input(sql, val)
         return True
-    
+
+
+
+class EventInviteEmbed(Embed):
+    def __init__(self, event_id):
+        super().__init__()
+        self.db = Database()
+        self.event_id = event_id
+        
+
+        selection = self.db.query_fetch("SELECT event_name, date, time, location, description, creator, datecreated FROM events_db WHERE event_id = ?", (self.event_id,))
+        event_name = selection[0][0]
+        date = selection[0][1]
+        time = selection[0][2]
+        location = selection[0][3]
+        description = selection[0][4]
+        creator = selection[0][5]
+        datecreated = selection[0][6]
+
+        accepted_rows = self.db.query_fetch("SELECT COUNT(*) FROM responses_db WHERE event_id = ? AND response = ?", (self.event_id, 'accepted',))
+        declined_rows = self.db.query_fetch("SELECT COUNT(*) FROM responses_db WHERE event_id = ? AND response = ?", (self.event_id, 'declined',))
+        tentative_rows = self.db.query_fetch("SELECT COUNT(*) FROM responses_db WHERE event_id = ? AND response = ?", (self.event_id, 'tentative',))
+        accepted_count = accepted_rows[0][0]
+        declined_count = declined_rows[0][0]
+        tentative_count = tentative_rows[0][0]
+
+        super().__init__(title=f"You are invited to the event: {event_name}!", description=description, color=Color.blue())
+        self.add_field(name=" ", value=" ", inline=False)
+        self.add_field(name=" ", value=" ", inline=False)
+        self.add_field(name=" ", value=" ", inline=False)
+        self.add_field(name="When", value=f"{date} at {time}", inline=True)
+        self.add_field(name="Where", value=location, inline=True)
+        self.add_field(name=" ", value=" ", inline=False)
+        self.add_field(name=" ", value=" ", inline=False)
+        self.add_field(name="Attending ✅ ", value=str(accepted_count), inline=True)
+        self.add_field(name="Can't Go ❌", value=str(declined_count), inline=True)
+        self.add_field(name="Maybe ❔", value=str(tentative_count), inline=True)
+        self.add_field(name=" ", value=" ", inline=False)
+        self.add_field(name=" ", value=" ", inline=False)
+        self.add_field(name=" ", value=" ", inline=False)
+        self.add_field(name="Please let us know if you can make it by selecting an option below!", value=" ", inline=False)
+        self.set_footer(text=f"Created by {creator} on {datecreated}")
+
+
+
+class EventResponsesEmbed(Embed):
+    def __init__(self, event_id):
+        super().__init__()
+        self.db = Database()
+        self.event_id = event_id
+        
+        selection = self.db.query_fetch("SELECT event_name, date, time FROM events_db WHERE event_id = ?", (self.event_id,))
+        event_name = selection[0][0]
+        date = selection[0][1]
+        time = selection[0][2]
+
+        accepted_rows = self.db.query_fetch("SELECT username FROM responses_db WHERE event_id = ? AND response = ?", (self.event_id, 'accepted',))
+        accepted_users = [row[0] for row in accepted_rows]
+        accepted_string = "\n".join(accepted_users) if accepted_users else "[No one]"
+
+        declined_rows = self.db.query_fetch("SELECT username FROM responses_db WHERE event_id = ? AND response = ?", (self.event_id, 'declined',))
+        declined_users = [row[0] for row in declined_rows]
+        declined_string = "\n".join(declined_users) if declined_users else "[No one]"
+
+        tentative_rows = self.db.query_fetch("SELECT username FROM responses_db WHERE event_id = ? AND response = ?", (self.event_id, 'tentative',))
+        tentative_users = [row[0] for row in tentative_rows]
+        tentative_string = "\n".join(tentative_users) if tentative_users else "[No one]"
+
+        super().__init__(title=f"RSVP responses for {event_name} on {date} at {time}", color=Color.blue())
+        self.add_field(name=" ", value=" ", inline=False)
+        self.add_field(name="Attending ✅ ", value=accepted_string, inline=True)
+        self.add_field(name="Can't Go ❌", value=declined_string, inline=True)
+        self.add_field(name="Maybe ❔", value=tentative_string, inline=True)
+
 
 
 async def setup(client: commands.Bot) -> None:
