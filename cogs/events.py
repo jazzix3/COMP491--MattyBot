@@ -3,8 +3,8 @@ from discord import app_commands, ui,  Interaction, Embed, SelectOption, Color
 from discord.ext import commands
 from matty_db import Database
 from modals import AddEventModal
-
-
+from views import EventsView
+from eventinvite import EventInviteView
 
 
 
@@ -20,7 +20,7 @@ class EventCommands(commands.Cog):
     @app_commands.command(name="events", description="View all events and event informmation")
     async def events(self, interaction: Interaction):
         server_id = interaction.guild_id
-        await interaction.response.send_message(view=ViewEventsView(server_id, call='view'), ephemeral=True)
+        await interaction.response.send_message(view=EventsView(server_id, call='view'), ephemeral=True)
 
 
     @member.command(name="list", description="View a list of all events")
@@ -51,7 +51,6 @@ class EventCommands(commands.Cog):
         await interaction.response.send_message("You must have the role MattyBotAdmin to use that command", ephemeral=True)
 
 
-
     @admin.command(name="clearall", description="Clear all events from the database (Admins only)")
     @app_commands.checks.has_role("MattyBotAdmin")
     async def clearall(self, interaction: Interaction):
@@ -63,86 +62,37 @@ class EventCommands(commands.Cog):
         await interaction.response.send_message("You must have the role MattyBotAdmin to use that command", ephemeral=True)
 
 
-    @admin.command(name="delete", description = "Delete an event from the database ")
+    @admin.command(name="delete", description = "Delete an event from the database (Admins only) ")
     @app_commands.checks.has_role("MattyBotAdmin")
     async def delete(self, interaction: discord.Interaction):
         server_id = interaction.guild_id
-        await interaction.response.send_message(view=ViewEventsView(server_id, call='delete'), ephemeral=True)
+        await interaction.response.send_message(view=EventsView(server_id, call='delete'), ephemeral=True)
     @delete.error
     async def deleteeventerror(self, interaction:Interaction, error):
         await interaction.response.send_message("You must have the role MattyBotAdmin to use that command", ephemeral=True)
 
+
+    @admin.command(name="invite", description="Send an invitation for an event (Admins only)")
+    @app_commands.checks.has_role("MattyBotAdmin")
+    async def eventinvite(self, interaction: Interaction):
+        server_id = interaction.guild_id
+        await interaction.response.send_message(view=EventInviteView(server_id, call='invite'), ephemeral=True)
+    @eventinvite.error
+    async def addfaqerror(self, interaction:Interaction, error):
+        await interaction.response.send_message("You must have the role MattyBotAdmin to use that command", ephemeral=True) 
+
+
+    @admin.command(name="viewresponses", description="View all RSVP responses for an event (Admins only)")
+    @app_commands.checks.has_role("MattyBotAdmin")
+    async def viewresponses(self, interaction: Interaction):
+        server_id = interaction.guild_id
+        await interaction.response.send_message(view=EventInviteView(server_id, call='responses'), ephemeral=True)
+    @viewresponses.error
+    async def addfaqerror(self, interaction:Interaction, error):
+        await interaction.response.send_message("You must have the role MattyBotAdmin to use that command", ephemeral=True) 
+
+
     
-
-
-
-
-
-
-class ViewEventsMenu(ui.Select):
-    def __init__(self, server_id, call):
-        self.db = Database()
-        self.call = call
-        rows = self.db.query_fetch("SELECT event_name, event_id FROM events_db WHERE server_id = ?", (server_id,))
-        if rows:
-            options = [SelectOption(label=row[0], value=row[1]) for row in rows]
-        else:
-            options = [SelectOption(label="There are currently no events", value="none")]  
-
-        if call == 'view':
-            super().__init__(placeholder="Select an event to view the event details", options=options)
-        else: 
-            super().__init__(placeholder="Select an event to delete", options=options)
-    
-    async def callback(self, interaction: Interaction):
-        if self.values[0] == "none":
-            await interaction.response.defer()
-            return
-        selection = self.db.query_fetch('''
-            SELECT event_name, date, time, location, description, creator, datecreated FROM events_db WHERE event_id = ?
-            ''', (self.values[0],))
-        accepted_rows = self.db.query_fetch("SELECT COUNT(*) FROM responses_db WHERE event_id = ? AND response = ?" , (self.values[0], 'accepted',))
-        declined_rows = self.db.query_fetch("SELECT COUNT(*) FROM responses_db WHERE event_id = ? AND response = ?" , (self.values[0], 'declined',))
-        tentative_rows = self.db.query_fetch("SELECT COUNT(*) FROM responses_db WHERE event_id = ? AND response = ?" , (self.values[0], 'tentative',))
-        
-        
-        if selection:
-            event_name = selection[0][0]
-            date = selection[0][1]
-            time = selection[0][2]
-            location = selection[0][3]
-            description = selection [0][4]
-            creator = selection [0][5]
-            datecreated = selection[0][6]
-            accepted_count = accepted_rows[0][0]
-            declined_count = declined_rows[0][0]
-            tentative_count = tentative_rows[0][0]
-            if self.call == 'view':
-                embed = Embed(title=event_name, description=description, color = discord.Color.blue())
-                embed.add_field(name="When", value=f"{date} at {time}", inline = True)
-                embed.add_field(name="Where", value=location, inline = False)
-                embed.add_field(name=" ", value=" ", inline=False)
-                embed.add_field(name=" ", value=" ", inline=False)
-                embed.add_field(name="Attending ✅ ", value=str(accepted_count), inline = True)
-                embed.add_field(name="Can't Go ❌", value=str(declined_count), inline = True)
-                embed.add_field(name="Maybe ❔", value=str(tentative_count), inline = True)
-                embed.add_field(name=" ", value=" ", inline=False)
-                embed.add_field(name=" ", value=" ", inline=False)
-                embed.set_footer(text=f"Created by {creator} on {datecreated}")
-                await interaction.response.edit_message(embed=embed)
-            else: 
-                self.db.query("DELETE FROM events_db WHERE event_id = ?", self.values[0])
-                await interaction.response.send_message(content="Event deleted!", ephemeral=True)
-        else:
-            await interaction.response.send_message(content="Oops! Something went wrong", ephemeral=True)
-
-
-class ViewEventsView(ui.View):
-     def __init__(self, server_id, call, *, timeout = 180):
-         super().__init__(timeout=timeout)
-         self.add_item(ViewEventsMenu(server_id, call))
-
-
 
 async def setup(client: commands.Bot) -> None:
     await client.add_cog(EventCommands(client))
