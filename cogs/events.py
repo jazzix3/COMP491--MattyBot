@@ -13,43 +13,22 @@ class EventCommands(commands.Cog):
         self.client = client
         self.db = Database()
     
-
-    @app_commands.command(name="addevent", description="Add a new event")
-    @app_commands.checks.has_role("MattyBotAdmin")
-    async def addevent(self, interaction: Interaction):
-        await interaction.response.send_modal(AddEventModal())
-    @addevent.error
-    async def addfaqerror(self, interaction:Interaction, error):
-        await interaction.response.send_message("You must have the role MattyBotAdmin to use that command", ephemeral=True)
+    member = app_commands.Group(name="events-", description="Events")    
+    admin = app_commands.Group(name="events--", description="Events")
 
 
-
-    @app_commands.command(name="clearallevents", description="Clear all events from the database")
-    @app_commands.checks.has_role("MattyBotAdmin")
-    async def clearallevents(self, interaction: Interaction):
-        self.db.query("DELETE FROM events_db")
-        embed = Embed(title="Clear all events", description="Success! All events have been cleared from the database", color=Color.green())
-        await interaction.response.send_message(embed=embed, ephemeral=True)
-    @clearallevents.error
-    async def clearalleventserror(self, interaction:Interaction, error):
-        await interaction.response.send_message("You must have the role MattyBotAdmin to use that command", ephemeral=True)
-
-
-    @app_commands.command(name="deleteevent", description = "Delete an event from the database")
-    @app_commands.checks.has_role("MattyBotAdmin")
-    async def deleteevent(self, interaction: discord.Interaction):
+    @app_commands.command(name="events", description="View all events and event informmation")
+    async def events(self, interaction: Interaction):
         server_id = interaction.guild_id
-        await interaction.response.send_message(view=ViewEventsView(server_id, call='delete'), ephemeral=True)
-    @deleteevent.error
-    async def deleteeventerror(self, interaction:Interaction, error):
-        await interaction.response.send_message("You must have the role MattyBotAdmin to use that command", ephemeral=True)
+        await interaction.response.send_message(view=ViewEventsView(server_id, call='view'), ephemeral=True)
 
-    @app_commands.command(name="listevents", description="View a list of all events")
-    async def listevents(self, interaction: Interaction):
+
+    @member.command(name="list", description="View a list of all events")
+    async def list(self, interaction: Interaction):
         server_id = interaction.guild_id
         rows = self.db.query_fetch("SELECT event_name, date, time FROM events_db WHERE server_id = ?", (server_id,))
         if rows:
-            embed = Embed(title="List of all events", description="For more information about an event, type command **/viewevents**", color = Color.orange())
+            embed = Embed(title="List of all events", description="For more information about an event, type command **/events**", color = Color.orange())
             count = 1
             for row in rows:
                 event_name = row[0]
@@ -63,10 +42,40 @@ class EventCommands(commands.Cog):
             await interaction.response.send_message(embed=embed2, ephemeral=True)
 
 
-    @app_commands.command(name="viewevents", description="View all events")
-    async def viewevents(self, interaction: Interaction):
+    @admin.command(name="add", description="Add a new event (Admins only)")
+    @app_commands.checks.has_role("MattyBotAdmin")
+    async def add(self, interaction: Interaction):
+        await interaction.response.send_modal(AddEventModal())
+    @add.error
+    async def addfaqerror(self, interaction:Interaction, error):
+        await interaction.response.send_message("You must have the role MattyBotAdmin to use that command", ephemeral=True)
+
+
+
+    @admin.command(name="clearall", description="Clear all events from the database (Admins only)")
+    @app_commands.checks.has_role("MattyBotAdmin")
+    async def clearall(self, interaction: Interaction):
+        self.db.query("DELETE FROM events_db")
+        embed = Embed(title="Clear all events", description="Success! All events have been cleared from the database", color=Color.green())
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+    @clearall.error
+    async def clearalleventserror(self, interaction:Interaction, error):
+        await interaction.response.send_message("You must have the role MattyBotAdmin to use that command", ephemeral=True)
+
+
+    @admin.command(name="delete", description = "Delete an event from the database ")
+    @app_commands.checks.has_role("MattyBotAdmin")
+    async def delete(self, interaction: discord.Interaction):
         server_id = interaction.guild_id
-        await interaction.response.send_message(view=ViewEventsView(server_id, call='view'), ephemeral=True)
+        await interaction.response.send_message(view=ViewEventsView(server_id, call='delete'), ephemeral=True)
+    @delete.error
+    async def deleteeventerror(self, interaction:Interaction, error):
+        await interaction.response.send_message("You must have the role MattyBotAdmin to use that command", ephemeral=True)
+
+    
+
+
+
 
 
 

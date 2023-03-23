@@ -4,11 +4,10 @@ from discord.ext import commands
 from matty_db import Database
 
 
-class ExampleDB(commands.Cog):
+class ExampleDB(commands.GroupCog, name="test"):
     def __init__(self, client: commands.Bot):
         self.client = client
-        self.db = Database()
-        
+        self.db = Database()  
 
     @app_commands.command(name="insertdb", description="Fills the database with FAQ and event examples")
     async def insertdb(self, interaction: Interaction):

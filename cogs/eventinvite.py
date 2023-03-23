@@ -10,9 +10,14 @@ class EventInvitation(commands.Cog):
         self.client = client
         self.db = Database()
 
+    @app_commands.command(name="eventresponses", description="View all RSVP responses for an event")
+    async def eventresponses(self, interaction: Interaction):
+        server_id = interaction.guild_id
+        await interaction.response.send_message(view=EventInviteView(server_id, call='responses'), ephemeral=True)
 
 
-    @app_commands.command(name="eventinvite", description="Send an invitation to an event")
+
+    @app_commands.command(name="eventinvite", description="Create an invitation for an event")
     @app_commands.checks.has_role("MattyBotAdmin")
     async def eventinvite(self, interaction: Interaction):
         server_id = interaction.guild_id
@@ -21,10 +26,7 @@ class EventInvitation(commands.Cog):
     async def addfaqerror(self, interaction:Interaction, error):
         await interaction.response.send_message("You must have the role MattyBotAdmin to use that command", ephemeral=True) 
 
-    @app_commands.command(name="eventresponses", description="View the RSVP responses for an event")
-    async def eventresponses(self, interaction: Interaction):
-        server_id = interaction.guild_id
-        await interaction.response.send_message(view=EventInviteView(server_id, call='responses'), ephemeral=True)
+
 
 
 
