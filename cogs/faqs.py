@@ -13,21 +13,33 @@ class FAQCommands(commands.Cog):
 
 
     @app_commands.command(name="addfaq", description="Add a question & answer to FAQs")
+    @app_commands.checks.has_role("MattyBotAdmin")
     async def addfaq(self, interaction: Interaction):
-        await interaction.response.send_modal(AddFaqModal())
+        await interaction.response.send_modal(AddFaqModal()) 
+    @addfaq.error
+    async def addfaqerror(self, interaction:Interaction, error):
+        await interaction.response.send_message("You must have the role MattyBotAdmin to use that command", ephemeral=True)
 
 
     @app_commands.command(name="clearallfaq", description="Clear all FAQs from the database")
+    @app_commands.checks.has_role("MattyBotAdmin")
     async def clearallfaq(self, interaction: Interaction):
         self.db.query("DELETE FROM faqs_db")
         embed = Embed(title="Clear all FAQs", description="Success! All FAQs have been cleared from the database", color=Color.green())
         await interaction.response.send_message(embed=embed, ephemeral=True)
+    @clearallfaq.error
+    async def clearallfaqerror(self, interaction:Interaction, error):
+        await interaction.response.send_message("You must have the role MattyBotAdmin to use that command", ephemeral=True)
 
 
     @app_commands.command(name="deletefaq", description = "Delete a FAQ from the database")
+    @app_commands.checks.has_role("MattyBotAdmin")
     async def deletefaq(self, interaction: discord.Interaction):
         server_id = interaction.guild_id
         await interaction.response.send_message(view=ViewFaqView(server_id, call='delete'), ephemeral=True)
+    @deletefaq.error
+    async def deletefaqerror(self, interaction:Interaction, error):
+        await interaction.response.send_message("You must have the role MattyBotAdmin to use that command", ephemeral=True)
 
 
     @app_commands.command(name="listfaq", description="View a list of all FAQs")
