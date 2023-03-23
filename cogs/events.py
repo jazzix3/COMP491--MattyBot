@@ -6,28 +6,43 @@ from modals import AddEventModal
 
 
 
+
+
 class EventCommands(commands.Cog):
     def __init__(self, client: commands.Bot):
         self.client = client
         self.db = Database()
-
+    
 
     @app_commands.command(name="addevent", description="Add a new event")
+    @app_commands.checks.has_role("MattyBotAdmin")
     async def addevent(self, interaction: Interaction):
         await interaction.response.send_modal(AddEventModal())
+    @addevent.error
+    async def addfaqerror(self, interaction:Interaction, error):
+        await interaction.response.send_message("You must have the role MattyBotAdmin to use that command", ephemeral=True)
+
 
 
     @app_commands.command(name="clearallevents", description="Clear all events from the database")
+    @app_commands.checks.has_role("MattyBotAdmin")
     async def clearallevents(self, interaction: Interaction):
         self.db.query("DELETE FROM events_db")
         embed = Embed(title="Clear all events", description="Success! All events have been cleared from the database", color=Color.green())
         await interaction.response.send_message(embed=embed, ephemeral=True)
+    @clearallevents.error
+    async def clearalleventserror(self, interaction:Interaction, error):
+        await interaction.response.send_message("You must have the role MattyBotAdmin to use that command", ephemeral=True)
 
 
     @app_commands.command(name="deleteevent", description = "Delete an event from the database")
+    @app_commands.checks.has_role("MattyBotAdmin")
     async def deleteevent(self, interaction: discord.Interaction):
         server_id = interaction.guild_id
         await interaction.response.send_message(view=ViewEventsView(server_id, call='delete'), ephemeral=True)
+    @deleteevent.error
+    async def deleteeventerror(self, interaction:Interaction, error):
+        await interaction.response.send_message("You must have the role MattyBotAdmin to use that command", ephemeral=True)
 
     @app_commands.command(name="listevents", description="View a list of all events")
     async def listevents(self, interaction: Interaction):
