@@ -1,32 +1,6 @@
 import discord
-from discord import app_commands, ui,  Interaction, Embed, SelectOption, Color
-from discord.ext import commands
+from discord import ui,  Interaction, Embed, SelectOption, Color
 from matty_db import Database
-
-
-
-class EventInvitation(commands.Cog):
-    def __init__(self, client: commands.Bot):
-        self.client = client
-        self.db = Database()
-
-    @app_commands.command(name="eventresponses", description="View all RSVP responses for an event")
-    async def eventresponses(self, interaction: Interaction):
-        server_id = interaction.guild_id
-        await interaction.response.send_message(view=EventInviteView(server_id, call='responses'), ephemeral=True)
-
-
-
-    @app_commands.command(name="eventinvite", description="Create an invitation for an event")
-    @app_commands.checks.has_role("MattyBotAdmin")
-    async def eventinvite(self, interaction: Interaction):
-        server_id = interaction.guild_id
-        await interaction.response.send_message(view=EventInviteView(server_id, call='invite'), ephemeral=True)
-    @eventinvite.error
-    async def addfaqerror(self, interaction:Interaction, error):
-        await interaction.response.send_message("You must have the role MattyBotAdmin to use that command", ephemeral=True) 
-
-
 
 
 
@@ -213,8 +187,3 @@ class EventResponsesEmbed(Embed):
         self.add_field(name="Attending ✅ ", value=accepted_string, inline=True)
         self.add_field(name="Can't Go ❌", value=declined_string, inline=True)
         self.add_field(name="Maybe ❔", value=tentative_string, inline=True)
-
-
-
-async def setup(client: commands.Bot) -> None:
-    await client.add_cog(EventInvitation(client))
