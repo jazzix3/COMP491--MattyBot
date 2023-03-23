@@ -28,7 +28,7 @@ class EventCommands(commands.Cog):
         server_id = interaction.guild_id
         rows = self.db.query_fetch("SELECT event_name, date, time FROM events_db WHERE server_id = ?", (server_id,))
         if rows:
-            embed = Embed(title="List of all events", description="For more information about an event, type command **/events**", color = Color.orange())
+            embed = Embed(title="List of all events", description="For more information about an event, type command **/events**", color = Color.blue())
             count = 1
             for row in rows:
                 event_name = row[0]
@@ -38,7 +38,7 @@ class EventCommands(commands.Cog):
                 count += 1
             await interaction.response.send_message(embed=embed, ephemeral=True)
         else:
-            embed2 = Embed(title="List of all events", description ="There are currently no events", color=Color.orange())
+            embed2 = Embed(title="List of all events", description ="There are currently no events", color=Color.blue())
             await interaction.response.send_message(embed=embed2, ephemeral=True)
 
 
