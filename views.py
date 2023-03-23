@@ -104,6 +104,7 @@ class EventsMenu(ui.Select):
                 await interaction.response.edit_message(embed=embed)
             else: 
                 self.db.query("DELETE FROM events_db WHERE event_id = ?", self.values[0])
+                self.db.query("DELETE FROM responses_db WHERE event_id = ?", self.values[0])
                 await interaction.response.send_message(content="Event deleted!", ephemeral=True)
         else:
             await interaction.response.send_message(content="Oops! Something went wrong", ephemeral=True)

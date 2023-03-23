@@ -26,7 +26,7 @@ class EventCommands(commands.Cog):
     @member.command(name="list", description="View a list of all events")
     async def list(self, interaction: Interaction):
         server_id = interaction.guild_id
-        rows = self.db.query_fetch("SELECT event_name, date, time FROM events_db WHERE server_id = ?", (server_id,))
+        rows = self.db.query_fetch("SELECT event_name, date, time FROM events_db WHERE server_id = ? ORDER BY date", (server_id,))
         if rows:
             embed = Embed(title="List of all events", description="For more information about an event, type command **/events**", color = Color.blue())
             count = 1

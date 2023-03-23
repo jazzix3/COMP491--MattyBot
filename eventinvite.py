@@ -61,8 +61,8 @@ class EventInviteButtons(ui.View):
             new_embed = EventInviteEmbed(event_id=event_id)
             new_view = EventInviteButtons(event_id)
             await interaction.response.edit_message(embed=new_embed, view=new_view)
-            await interaction.channel.send(f"{username} is going!")
-
+            response_embed = Embed(title="✅ You are attending!", description=f"See you there, {username}! Thank you for responding to this event.", color = Color.blue())
+            await interaction.followup.send(embed=response_embed, ephemeral=True)
         else:
             await interaction.response.send_message(content="Oops! Something went wrong", ephemeral=True)
 
@@ -76,7 +76,8 @@ class EventInviteButtons(ui.View):
             new_embed = EventInviteEmbed(event_id=event_id)
             new_view = EventInviteButtons(event_id)
             await interaction.response.edit_message(embed=new_embed, view=new_view)
-            await interaction.channel.send(f"{username} is not going!")
+            response_embed = Embed(title="❌ Sorry you can't go!", description=f"Hope to see you next time, {username}! Thank you for responding to this event.", color = Color.blue())
+            await interaction.followup.send(embed=response_embed, ephemeral=True)
         else:
             await interaction.response.send_message(content="Oops! Something went wrong", ephemeral=True)
 
@@ -90,7 +91,8 @@ class EventInviteButtons(ui.View):
             new_embed = EventInviteEmbed(event_id=event_id)
             new_view = EventInviteButtons(event_id)
             await interaction.response.edit_message(embed=new_embed, view=new_view)
-            await interaction.channel.send(f"{username} is unsure!")
+            response_embed = Embed(title="❔ We marked you as 'maybe', and we hope you can make it!", description="Update your RSVP anytime using command **/event RSVP**. Thank you for responding to this event.", color = Color.blue())
+            await interaction.followup.send(embed=response_embed, ephemeral=True)
         else:
             await interaction.response.send_message(content="Oops! Something went wrong", ephemeral=True)
 
@@ -140,12 +142,12 @@ class EventInviteEmbed(Embed):
         declined_count = declined_rows[0][0]
         tentative_count = tentative_rows[0][0]
 
-        super().__init__(title=f"You are invited to the event: {event_name}!", description=description, color=Color.blue())
+        super().__init__(title=f"✉️ You are invited to the event: `{event_name}`", description=description, color=Color.blue())
         self.add_field(name=" ", value=" ", inline=False)
         self.add_field(name=" ", value=" ", inline=False)
         self.add_field(name=" ", value=" ", inline=False)
-        self.add_field(name="When", value=f"{date} at {time}", inline=True)
-        self.add_field(name="Where", value=location, inline=True)
+        self.add_field(name="⏰ When", value=f"{date} at {time}", inline=True)
+        self.add_field(name="📍 Where", value=location, inline=True)
         self.add_field(name=" ", value=" ", inline=False)
         self.add_field(name=" ", value=" ", inline=False)
         self.add_field(name="Attending ✅ ", value=str(accepted_count), inline=True)
@@ -154,8 +156,8 @@ class EventInviteEmbed(Embed):
         self.add_field(name=" ", value=" ", inline=False)
         self.add_field(name=" ", value=" ", inline=False)
         self.add_field(name=" ", value=" ", inline=False)
-        self.add_field(name="Please let us know if you can make it by selecting an option below!", value=" ", inline=False)
-        self.set_footer(text=f"Created by {creator} on {datecreated}")
+        self.add_field(name=f"`Please let us know if you can make it by selecting an option below!`", value=" ", inline=False)
+        
 
 
 
