@@ -61,8 +61,8 @@ class EventInviteButtons(ui.View):
             new_embed = EventInviteEmbed(event_id=event_id)
             new_view = EventInviteButtons(event_id)
             await interaction.response.edit_message(embed=new_embed, view=new_view)
-            await interaction.channel.send(f"{username} is going!")
-
+            response_embed = Embed(title="✅ You are attending!", description=f"See you there, {username}! Thank you for responding to this event.", color = Color.blue())
+            await interaction.followup.send(embed=response_embed, ephemeral=True)
         else:
             await interaction.response.send_message(content="Oops! Something went wrong", ephemeral=True)
 
@@ -76,7 +76,8 @@ class EventInviteButtons(ui.View):
             new_embed = EventInviteEmbed(event_id=event_id)
             new_view = EventInviteButtons(event_id)
             await interaction.response.edit_message(embed=new_embed, view=new_view)
-            await interaction.channel.send(f"{username} is not going!")
+            response_embed = Embed(title="❌ Sorry you can't go!", description=f"Hope to see you next time, {username}! Thank you for responding to this event.", color = Color.blue())
+            await interaction.followup.send(embed=response_embed, ephemeral=True)
         else:
             await interaction.response.send_message(content="Oops! Something went wrong", ephemeral=True)
 
@@ -90,7 +91,8 @@ class EventInviteButtons(ui.View):
             new_embed = EventInviteEmbed(event_id=event_id)
             new_view = EventInviteButtons(event_id)
             await interaction.response.edit_message(embed=new_embed, view=new_view)
-            await interaction.channel.send(f"{username} is unsure!")
+            response_embed = Embed(title="❔ We marked you as 'maybe', and we hope you can make it!", description="Update your RSVP anytime using command **/event- RSVP**. Thank you for responding to this event.", color = Color.blue())
+            await interaction.followup.send(embed=response_embed, ephemeral=True)
         else:
             await interaction.response.send_message(content="Oops! Something went wrong", ephemeral=True)
 
@@ -124,14 +126,12 @@ class EventInviteEmbed(Embed):
         self.event_id = event_id
         
 
-        selection = self.db.query_fetch("SELECT event_name, date, time, location, description, creator, datecreated FROM events_db WHERE event_id = ?", (self.event_id,))
+        selection = self.db.query_fetch("SELECT event_name, date, time, location, description FROM events_db WHERE event_id = ?", (self.event_id,))
         event_name = selection[0][0]
         date = selection[0][1]
         time = selection[0][2]
         location = selection[0][3]
         description = selection[0][4]
-        creator = selection[0][5]
-        datecreated = selection[0][6]
 
         accepted_rows = self.db.query_fetch("SELECT COUNT(*) FROM responses_db WHERE event_id = ? AND response = ?", (self.event_id, 'accepted',))
         declined_rows = self.db.query_fetch("SELECT COUNT(*) FROM responses_db WHERE event_id = ? AND response = ?", (self.event_id, 'declined',))
@@ -140,12 +140,12 @@ class EventInviteEmbed(Embed):
         declined_count = declined_rows[0][0]
         tentative_count = tentative_rows[0][0]
 
-        super().__init__(title=f"You are invited to the event: {event_name}!", description=description, color=Color.blue())
+        super().__init__(title=f"✉️  You are invited to the event: `{event_name}`", description=description, color=Color.blue())
         self.add_field(name=" ", value=" ", inline=False)
         self.add_field(name=" ", value=" ", inline=False)
         self.add_field(name=" ", value=" ", inline=False)
-        self.add_field(name="When", value=f"{date} at {time}", inline=True)
-        self.add_field(name="Where", value=location, inline=True)
+        self.add_field(name="⏰ When", value=f"{date} at {time}", inline=True)
+        self.add_field(name="📍 Where", value=location, inline=True)
         self.add_field(name=" ", value=" ", inline=False)
         self.add_field(name=" ", value=" ", inline=False)
         self.add_field(name="Attending ✅ ", value=str(accepted_count), inline=True)
@@ -154,8 +154,8 @@ class EventInviteEmbed(Embed):
         self.add_field(name=" ", value=" ", inline=False)
         self.add_field(name=" ", value=" ", inline=False)
         self.add_field(name=" ", value=" ", inline=False)
-        self.add_field(name="Please let us know if you can make it by selecting an option below!", value=" ", inline=False)
-        self.set_footer(text=f"Created by {creator} on {datecreated}")
+        self.add_field(name=f"`Please let us know if you can make it by selecting an option below!`", value=" ", inline=False)
+        
 
 
 
@@ -165,10 +165,11 @@ class EventResponsesEmbed(Embed):
         self.db = Database()
         self.event_id = event_id
         
-        selection = self.db.query_fetch("SELECT event_name, date, time FROM events_db WHERE event_id = ?", (self.event_id,))
+        selection = self.db.query_fetch("SELECT event_name, date, time, location FROM events_db WHERE event_id = ?", (self.event_id,))
         event_name = selection[0][0]
         date = selection[0][1]
         time = selection[0][2]
+        location = selection[0][3]
 
         accepted_rows = self.db.query_fetch("SELECT username FROM responses_db WHERE event_id = ? AND response = ?", (self.event_id, 'accepted',))
         accepted_users = [row[0] for row in accepted_rows]
@@ -182,7 +183,13 @@ class EventResponsesEmbed(Embed):
         tentative_users = [row[0] for row in tentative_rows]
         tentative_string = "\n".join(tentative_users) if tentative_users else "[No one]"
 
-        super().__init__(title=f"RSVP responses for {event_name} on {date} at {time}", color=Color.blue())
+        super().__init__(title=f"📬  RSVP responses for `{event_name}`", color=Color.blue())
+        self.add_field(name=" ", value=" ", inline=False)
+        self.add_field(name=" ", value=" ", inline=False)
+        self.add_field(name=" ", value=" ", inline=False)
+        self.add_field(name="⏰ When", value=f"{date} at {time}", inline=True)
+        self.add_field(name="📍 Where", value=location, inline=True)
+        self.add_field(name=" ", value=" ", inline=False)
         self.add_field(name=" ", value=" ", inline=False)
         self.add_field(name="Attending ✅ ", value=accepted_string, inline=True)
         self.add_field(name="Can't Go ❌", value=declined_string, inline=True)

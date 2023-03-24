@@ -90,9 +90,12 @@ class EventsMenu(ui.Select):
             declined_count = declined_rows[0][0]
             tentative_count = tentative_rows[0][0]
             if self.call == 'view':
-                embed = Embed(title=event_name, description=description, color = discord.Color.blue())
-                embed.add_field(name="When", value=f"{date} at {time}", inline = True)
-                embed.add_field(name="Where", value=location, inline = False)
+                embed = Embed(title=f"📅  `{event_name}`", description=description, color = discord.Color.blue())
+                embed.add_field(name=" ", value=" ", inline=False)
+                embed.add_field(name=" ", value=" ", inline=False)
+                embed.add_field(name=" ", value=" ", inline=False)
+                embed.add_field(name="⏰ When", value=f"{date} at {time}", inline = True)
+                embed.add_field(name="📍 Where", value=location, inline = True)
                 embed.add_field(name=" ", value=" ", inline=False)
                 embed.add_field(name=" ", value=" ", inline=False)
                 embed.add_field(name="Attending ✅ ", value=str(accepted_count), inline = True)
@@ -104,6 +107,7 @@ class EventsMenu(ui.Select):
                 await interaction.response.edit_message(embed=embed)
             else: 
                 self.db.query("DELETE FROM events_db WHERE event_id = ?", self.values[0])
+                self.db.query("DELETE FROM responses_db WHERE event_id = ?", self.values[0])
                 await interaction.response.send_message(content="Event deleted!", ephemeral=True)
         else:
             await interaction.response.send_message(content="Oops! Something went wrong", ephemeral=True)
