@@ -35,7 +35,6 @@ pip install discord
 pip install python-dotenv
 pip install colorama
 ```
-(Note: You may need to restart your IDE and/or computer to complete installation)
 
 
 - Create a new file named `.env`, and include your bot token in the contents. It should be formatted like this:
@@ -45,27 +44,29 @@ DISCORD_BOT_TOKEN=yourbottokengoeshere
 
 ## Available Commands
 ### FAQ Commands: 
-`/addfaq` – Will open a modal (form) to prompt the user for a question and answer, which will be added to the FAQ. When the user submits the form, an embed message is sent to the channel confirming that the FAQ has been added, and the question and answer are saved in the database.
 
-`/clearallfaq` - Clears all FAQ from the database and sends a success message in an embed.
+`/faqs` – Displays a dropdown menu of questions stored in the database. When a user selects a question from the menu, the corresponding answer and additional information (such as the creator and date created) are displayed in an embed.
 
-`/deletefaq` – Deletes a FAQ from the database based on user input. It first fetches all the FAQs from the database, creates an embed displaying each FAQ along with its number, and prompts the user to enter the number of the FAQ they want to delete. Then, it waits for the user to input the number and deletes the corresponding FAQ from the database. Finally, it sends a confirmation message to the user that the FAQ has been successfully deleted.
+`/faqs- list` -  Retrieves a list of all FAQ questions from the database and sends them in an embedded message. If there are no FAQ in the database, it sends a message stating that there are none.
 
-`/listfaq` -  Retrieves a list of all FAQ questions from the database and sends them in an embedded message. If there are no FAQ in the database, it sends a message stating that there are none.
+`/faqs-- add` – (Admins only) Opens a modal (form) to prompt the user for a question and answer, which will be added to the FAQ. When the user submits the form, an embed message is sent to the channel confirming that the FAQ has been added, and the question and answer are saved in the database. 
 
-`/listanswers` – Retrieves a list of all the answers from the database and returns them in an embed. If there are no FAQ in the database, it sends a message stating that there are none.
+`/faqs-- clearall` - (Admins only) Clears all FAQ from the database and sends a success message in an embed.
 
-`/viewfaq` – Displays a dropdown menu of questions stored in the database. When a user selects a question from the menu, the corresponding answer and additional information (such as the creator and date created) are displayed in an embed.
- 
+`/faqs-- delete` – (Admins only) Displays a dropdown menu of questions store in the database. When a user selects a question from the menu, the corresponding faq is deleted from the database.
+
 
 ### Event Commands:
+`/events` - Displays a dropdown menu of events stored in the database. When a user selects an event from the menu, the event details from the database is populated in an embed. The message includes the event name, date, time, location, description, and creator, and has additional fields for users to indicate if they are attending, not attending, or unsure about the event.
 
-`/addevent` - Will open a modal (form) to prompt the user to input details about the event.  When the user submits the form, it adds the new event to a database and sends a message confirming that the event has been added. The message includes information about the event, such as the event name, date, time, location, and description, as well as the name of the user who created the event and the date it was created.
+`/events- list` - Retrieves a list of all events from the database and creates an embed that displays the names, dates, and times of all events. If there are no events in the database, it sends a message stating that there are none.
 
-`/clearallevents` - Clears all FAQ from the database and sends a success message in an embed.
+`/events- RSVP` - Displays a dropdown menu of event names stored in the database. When a user selects an event from the menu, an invitation for a selected event is created and an embed is sent to the channel. Buttons are displayed so members can indicate whether they are "attending", "can't go", or "maybe". When a button is clicked, it updates the responses database with the member's RSVP and updates the original embed to display the number of attendees. This message is ephemeral, so only the member who called it can RSVP.
 
-`/deleteevent` - Deletes an event from the database based on user input. It first fetches all the events from the database, creates an embed displaying each event along with its number, and prompts the user to enter the number of the event they want to delete. Then, it waits for the user to input the number and deletes the corresponding even from the database. Finally, it sends a confirmation message to the user that the event has been successfully deleted.
+`/events-- add` - (Admins only) Opens a modal (form) to prompt the user to input details about the event.  When the user submits the form, it adds the new event to a database and sends a message confirming that the event has been added. The message includes information about the event, such as the event name, date, time, location, and description, as well as the name of the user who created the event and the date it was created.
 
-`/listevents` - Retrieves a list of all events from the database and creates an embed that displays the names, dates, and times of all events. If there are no events in the database, it sends a message stating that there are none.
+`/events-- clearall` - (Admins only) Clears all FAQ from the database and sends a success message in an embed.
 
-`/viewevents` - Displays a dropdown menu of events stored in the database. When a user selects an event from the menu, the event details from the database is populated in an embed. The message includes the event name, date, time, location, description, and creator, and has additional fields for users to indicate if they are attending, not attending, or unsure about the event.
+`/events-- delete` - (Admins only) Displays a dropdown menu of event names stored in the database. When a user selects an event from the menu, the corresponding event is deleted from the events database as well as the responses from the responses database.
+
+`/events-- invite` - (Admins only)  Displays a dropdown menu of event names stored in the database. When a user selects an event from the menu, an invitation for a selected event is created and an embed is sent to the channel. Buttons are displayed so members can indicate whether they are "attending", "can't go", or "maybe". When a button is clicked, it updates the responses database with the member's RSVP and updates the original embed to display the number of attendees. This message can be seen by all members so any member can RSVP.

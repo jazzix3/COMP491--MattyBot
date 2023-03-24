@@ -17,7 +17,7 @@ class EventCommands(commands.Cog):
     admin = app_commands.Group(name="events--", description="Events")
 
 
-    @app_commands.command(name="events", description="View all events and event informmation")
+    @app_commands.command(name="events", description="View all events and event information")
     async def events(self, interaction: Interaction):
         server_id = interaction.guild_id
         await interaction.response.send_message(view=EventsView(server_id, call='view'), ephemeral=True)
@@ -38,6 +38,15 @@ class EventCommands(commands.Cog):
         else:
             embed2 = Embed(title="List of all events", description ="There are currently no events", color=Color.blue())
             await interaction.response.send_message(embed=embed2, ephemeral=True)
+
+
+    @member.command(name="rsvp", description="RSVP for an event")
+    async def viewresponses(self, interaction: Interaction):
+        server_id = interaction.guild_id
+        await interaction.response.send_message(view=EventInviteView(server_id, call='memberrsvp'), ephemeral=True)
+    @viewresponses.error
+    async def viewresponseserror(self, interaction:Interaction, error):
+        await interaction.response.send_message(embed=AdminErrorEmbed(), ephemeral=True) 
 
 
     @admin.command(name="add", description="Add a new event (Admins only)")
