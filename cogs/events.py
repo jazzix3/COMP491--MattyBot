@@ -29,13 +29,11 @@ class EventCommands(commands.Cog):
         rows = self.db.query_fetch("SELECT event_name, date, time FROM events_db WHERE server_id = ? ORDER BY date", (server_id,))
         if rows:
             embed = Embed(title="List of all events", description="For more information about an event, type command **/events**", color = Color.blue())
-            count = 1
             for row in rows:
                 event_name = row[0]
                 date = row[1]
                 time = row[2]
-                embed.add_field(name=f"{count}- {event_name}", value=f"{date} at {time}", inline= False)
-                count += 1
+                embed.add_field(name=f"`{event_name}`", value=f"{date} at {time}", inline= False)
             await interaction.response.send_message(embed=embed, ephemeral=True)
         else:
             embed2 = Embed(title="List of all events", description ="There are currently no events", color=Color.blue())
@@ -47,8 +45,8 @@ class EventCommands(commands.Cog):
     async def add(self, interaction: Interaction):
         await interaction.response.send_modal(AddEventModal())
     @add.error
-    async def addfaqerror(self, interaction:Interaction, error):
-        await interaction.response.send_message("You must have the role MattyBotAdmin to use that command", ephemeral=True)
+    async def adderror(self, interaction:Interaction, error):
+        await interaction.response.send_message(embed=AdminErrorEmbed(), ephemeral=True)
 
 
     @admin.command(name="clearall", description="Clear all events from the database (Admins only)")
@@ -58,18 +56,18 @@ class EventCommands(commands.Cog):
         embed = Embed(title="Clear all events", description="Success! All events have been cleared from the database", color=Color.green())
         await interaction.response.send_message(embed=embed, ephemeral=True)
     @clearall.error
-    async def clearalleventserror(self, interaction:Interaction, error):
-        await interaction.response.send_message("You must have the role MattyBotAdmin to use that command", ephemeral=True)
+    async def clearallerror(self, interaction:Interaction, error):
+        await interaction.response.send_message(embed=AdminErrorEmbed(), ephemeral=True)
 
 
-    @admin.command(name="delete", description = "Delete an event from the database (Admins only) ")
+    @admin.command(name="delete", description = "Delete an event from the database (Admins only)")
     @app_commands.checks.has_role("MattyBotAdmin")
     async def delete(self, interaction: discord.Interaction):
         server_id = interaction.guild_id
         await interaction.response.send_message(view=EventsView(server_id, call='delete'), ephemeral=True)
     @delete.error
-    async def deleteeventerror(self, interaction:Interaction, error):
-        await interaction.response.send_message("You must have the role MattyBotAdmin to use that command", ephemeral=True)
+    async def deleteerror(self, interaction:Interaction, error):
+        await interaction.response.send_message(embed=AdminErrorEmbed(), ephemeral=True)
 
 
     @admin.command(name="invite", description="Send an invitation for an event (Admins only)")
@@ -78,8 +76,8 @@ class EventCommands(commands.Cog):
         server_id = interaction.guild_id
         await interaction.response.send_message(view=EventInviteView(server_id, call='invite'), ephemeral=True)
     @eventinvite.error
-    async def addfaqerror(self, interaction:Interaction, error):
-        await interaction.response.send_message("You must have the role MattyBotAdmin to use that command", ephemeral=True) 
+    async def eventerror(self, interaction:Interaction, error):
+       await interaction.response.send_message(embed=AdminErrorEmbed(), ephemeral=True) 
 
 
     @admin.command(name="viewresponses", description="View all RSVP responses for an event (Admins only)")
@@ -88,9 +86,16 @@ class EventCommands(commands.Cog):
         server_id = interaction.guild_id
         await interaction.response.send_message(view=EventInviteView(server_id, call='responses'), ephemeral=True)
     @viewresponses.error
-    async def addfaqerror(self, interaction:Interaction, error):
-        await interaction.response.send_message("You must have the role MattyBotAdmin to use that command", ephemeral=True) 
+    async def viewresponseserror(self, interaction:Interaction, error):
+        await interaction.response.send_message(embed=AdminErrorEmbed(), ephemeral=True) 
 
+
+class AdminErrorEmbed(Embed):
+    def __init__(self):
+        super().__init__()
+        self.db = Database()
+
+        super().__init__(title="", description=f"You must have the role `MattyBotAdmin` to use that command", color=Color.red())
 
     
 
