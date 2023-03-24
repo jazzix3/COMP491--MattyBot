@@ -23,23 +23,24 @@ class EventInviteMenu(ui.Select):
 
 
     async def callback(self, interaction: Interaction):
-        event_id = int(self.values[0])
+        event_id = self.values[0]
+        call = self.call
 
-        if self.values[0] == "none":
+        if event_id == "none":
             await interaction.response.defer()
             return
         
         else:
-            if self.call == 'invite':   
-                embed = EventInviteEmbed(event_id=event_id)
-                view = EventInviteButtons(event_id)
+            if call == 'invite':   
+                embed = EventInviteEmbed(event_id)
+                view = EventInviteButtons(event_id, call)
                 await interaction.response.send_message(embed=embed, view=view)
-            elif self.call == 'memberrsvp': 
-                embed = EventInviteEmbed(event_id=event_id)
-                view = EventInviteButtons(event_id)
-                await interaction.response.send_message(embed=embed, view=view, ephemeral=True, delete_after=30)
-            elif self.call == 'responses':
-                embed = EventResponsesEmbed(event_id=event_id)
+            elif call == 'memberrsvp': 
+                embed = EventInviteEmbed(event_id)
+                view = EventInviteButtons(event_id, call)
+                await interaction.response.edit_message(embed=embed, view=view, delete_after=30)
+            elif call == 'responses':
+                embed = EventResponsesEmbed(event_id)
                 await interaction.response.edit_message(embed=embed)
 
 
@@ -52,10 +53,11 @@ class EventInviteView(ui.View):
 
 
 class EventInviteButtons(ui.View):
-    def __init__(self, event_id, *, timeout=None):
+    def __init__(self, event_id, call, *, timeout=None):
         super().__init__(timeout=timeout)
         self.db = Database()
         self.event_id = event_id
+        self.call = call
         
 
     @discord.ui.button(label="Attending", style=discord.ButtonStyle.green)
@@ -64,11 +66,18 @@ class EventInviteButtons(ui.View):
         response = "accepted"
         if await self.update_response(username, response):
             event_id = self.event_id
-            new_embed = EventInviteEmbed(event_id=event_id)
-            new_view = EventInviteButtons(event_id)
-            await interaction.response.edit_message(embed=new_embed, view=new_view)
-            response_embed = Embed(title="✅ You are attending!", description=f"See you there, {username}! Thank you for responding to this event.", color = Color.blue())
-            await interaction.followup.send(embed=response_embed, ephemeral=True)
+            call = self.call
+            if call == 'invite':
+                new_embed = EventInviteEmbed(event_id)
+                new_view = EventInviteButtons(event_id, call)           
+                await interaction.response.edit_message(embed=new_embed, view=new_view)
+                response_embed = Embed(title="✅ You are attending!", description=f"See you there, {username}! Thank you for responding to this event.", color = Color.blue())
+                await interaction.followup.send(embed=response_embed, ephemeral=True)
+            elif call == 'memberrsvp':
+                response_embed = Embed(title="✅ You are attending!", description=f"See you there, {username}! Thank you for responding to this event.", color = Color.blue())
+                for child in self.children: #disables all buttons when one is pressed
+                    child.disabled = True
+                await interaction.response.edit_message(embed=response_embed, view=self)               
         else:
             embed = Embed(title="", description=f"Oops! Something went wrong. Try again or contact support.", color = discord.Color.red())
             await interaction.response.send_message(embed=embed, ephemeral=True)
@@ -80,14 +89,19 @@ class EventInviteButtons(ui.View):
         response = "declined"
         if await self.update_response(username, response):
             event_id = self.event_id
-            new_embed = EventInviteEmbed(event_id=event_id)
-            new_view = EventInviteButtons(event_id)
-            await interaction.response.edit_message(embed=new_embed, view=new_view)
-            response_embed = Embed(title="❌ Sorry you can't go!", description=f"Hope to see you next time, {username}! Thank you for responding to this event.", color = Color.blue())
-            await interaction.followup.send(embed=response_embed, ephemeral=True)
-        else:
-            embed = Embed(title="", description=f"Oops! Something went wrong. Try again or contact support.", color = discord.Color.red())
-            await interaction.response.send_message(embed=embed, ephemeral=True)
+            call = self.call
+            if call == 'invite':
+                new_embed = EventInviteEmbed(event_id)
+                new_view = EventInviteButtons(event_id, call)           
+                await interaction.response.edit_message(embed=new_embed, view=new_view)
+                response_embed = Embed(title="❌ Sorry you can't go!", description=f"Hope to see you next time, {username}! Thank you for responding to this event.", color = Color.blue())
+                await interaction.followup.send(embed=response_embed, ephemeral=True)
+            elif call == 'memberrsvp':
+                response_embed = Embed(title="❌ Sorry you can't go!", description=f"Hope to see you next time, {username}! Thank you for responding to this event.", color = Color.blue())
+                for child in self.children: #disables all buttons when one is pressed
+                    child.disabled = True
+                await interaction.response.edit_message(embed=response_embed, view=self)               
+        
 
 
     @discord.ui.button(label="Maybe", style=discord.ButtonStyle.grey)
@@ -96,14 +110,19 @@ class EventInviteButtons(ui.View):
         response = "tentative"
         if await self.update_response(username, response):
             event_id = self.event_id
-            new_embed = EventInviteEmbed(event_id=event_id)
-            new_view = EventInviteButtons(event_id)
-            await interaction.response.edit_message(embed=new_embed, view=new_view)
-            response_embed = Embed(title="❔ We marked you as 'maybe', and we hope you can make it!", description="Update your RSVP anytime using command **/event- RSVP**. Thank you for responding to this event.", color = Color.blue())
-            await interaction.followup.send(embed=response_embed, ephemeral=True)
-        else:
-            embed = Embed(title="", description=f"Oops! Something went wrong. Try again or contact support.", color = discord.Color.red())
-            await interaction.response.send_message(embed=embed, ephemeral=True)
+            call = self.call
+            if call == 'invite':
+                new_embed = EventInviteEmbed(event_id)
+                new_view = EventInviteButtons(event_id, call)           
+                await interaction.response.edit_message(embed=new_embed, view=new_view)
+                response_embed = Embed(title="❔ We marked you as 'maybe', and we hope you can make it!", description="Update your RSVP anytime using command **/event- RSVP**. Thank you for responding to this event.", color = Color.blue())
+                await interaction.followup.send(embed=response_embed, ephemeral=True)
+            elif call == 'memberrsvp':
+                response_embed = Embed(title="❔ We marked you as 'maybe', and we hope you can make it!", description="Update your RSVP anytime using command **/event- RSVP**. Thank you for responding to this event.", color = Color.blue())
+                for child in self.children: #disables all buttons when one is pressed
+                    child.disabled = True
+                await interaction.response.edit_message(embed=response_embed, view=self)
+        
 
 
     async def update_response(self, username, response):
