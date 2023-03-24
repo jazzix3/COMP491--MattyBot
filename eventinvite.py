@@ -142,7 +142,7 @@ class EventInviteEmbed(Embed):
         declined_count = declined_rows[0][0]
         tentative_count = tentative_rows[0][0]
 
-        super().__init__(title=f"✉️ You are invited to the event: `{event_name}`", description=description, color=Color.blue())
+        super().__init__(title=f"✉️  You are invited to the event: `{event_name}`", description=description, color=Color.blue())
         self.add_field(name=" ", value=" ", inline=False)
         self.add_field(name=" ", value=" ", inline=False)
         self.add_field(name=" ", value=" ", inline=False)
