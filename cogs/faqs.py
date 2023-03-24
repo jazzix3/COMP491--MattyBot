@@ -44,7 +44,7 @@ class FAQCommands(commands.Cog):
         await interaction.response.send_modal(AddFaqModal()) 
     @add.error
     async def add(self, interaction:Interaction, error):
-        await interaction.response.send_message("You must have the role MattyBotAdmin to use that command", ephemeral=True)
+        await interaction.response.send_message(embed=AdminErrorEmbed(), ephemeral=True) 
 
 
     @admin.command(name="clearall", description="Clear all FAQs from the database (Admins only)")
@@ -54,8 +54,8 @@ class FAQCommands(commands.Cog):
         embed = Embed(title="Clear all FAQs", description="Success! All FAQs have been cleared from the database", color=Color.green())
         await interaction.response.send_message(embed=embed, ephemeral=True)
     @clearall.error
-    async def clearallfaqerror(self, interaction:Interaction, error):
-        await interaction.response.send_message("You must have the role MattyBotAdmin to use that command", ephemeral=True)
+    async def clearallerror(self, interaction:Interaction, error):
+        await interaction.response.send_message(embed=AdminErrorEmbed(), ephemeral=True) 
 
 
     @admin.command(name="delete", description = "Delete a FAQ from the database (Admins only)")
@@ -65,9 +65,17 @@ class FAQCommands(commands.Cog):
         await interaction.response.send_message(view=FaqsView(server_id, call='delete'), ephemeral=True)
     @delete.error
     async def deleteerror(self, interaction:Interaction, error):
-        await interaction.response.send_message("You must have the role MattyBotAdmin to use that command", ephemeral=True)
+        await interaction.response.send_message(embed=AdminErrorEmbed(), ephemeral=True) 
 
 
+
+class AdminErrorEmbed(Embed):
+    def __init__(self):
+        super().__init__()
+        self.db = Database()
+
+        super().__init__(title="", description=f"You must have the role `MattyBotAdmin` to use that command", color=Color.red())
+        
 
 async def setup(client: commands.Bot) -> None:
     await client.add_cog(FAQCommands(client))
