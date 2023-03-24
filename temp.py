@@ -20,12 +20,10 @@ class FaqsMenu(ui.Select):
             super().__init__(placeholder="Select an FAQ to delete", options=options)
 
     async def callback(self, interaction: Interaction):
-        faq_id = self.values[0]
-        if faq_id == "none":
+        if self.values[0] == "none":
             await interaction.response.defer()
             return
-        
-        selection = self.db.query_fetch("SELECT question, answer, creator, datecreated FROM faqs_db WHERE faq_id = ?", (faq_id,))
+        selection = self.db.query_fetch("SELECT question, answer, creator, datecreated FROM faqs_db WHERE faq_id = ?", (self.values[0],))
 
         if selection:
             question = selection[0][0]
@@ -33,20 +31,15 @@ class FaqsMenu(ui.Select):
             creator = selection[0][2]
             datecreated = selection[0][3]
             if self.call == 'view':
-                embed = Embed(title=f"`{question}`", description=answer, color=Color.orange())
+                embed = Embed(title=question, description=answer, color=Color.orange())
                 embed.add_field(name=" ", value=" ", inline=False)
                 embed.add_field(name=" ", value=" ", inline=False)
                 embed.set_footer(text=f"Created by {creator} on {datecreated}")
                 await interaction.response.edit_message(embed=embed)
-            elif self.call == 'delete':
-                embed2 = Embed(title="Are you sure you want to DELETE this FAQ?", description="", color=Color.orange())
-                embed2.add_field(name=" ", value=" ", inline=False)
-                embed2.add_field(name=" ", value=" ", inline=False)
-                embed2.add_field(name=f"`{question}`", value=answer, inline=False)
-                embed2.add_field(name="", value=" ", inline=False)
-                embed2.set_footer(text="⚠️ This action cannot be undone")
-                view = DeleteFaqsButtons(faq_id, question)
-                await interaction.response.edit_message(embed=embed2, view=view)
+            elif self.call == 'delete': 
+                self.db.query("DELETE FROM faqs_db WHERE faq_id = ?", self.values[0])
+                embed = Embed(title="", description=f"FAQ `{question}` has been deleted!", color = discord.Color.green())
+                await interaction.response.send_message(embed=embed, ephemeral=True)
         else:
             embed = Embed(title="", description=f"Oops! Something went wrong. Try again or contact support.", color = discord.Color.red())
             await interaction.response.send_message(embed=embed, ephemeral=True)
@@ -56,43 +49,6 @@ class FaqsView(ui.View):
      def __init__(self, server_id, call, *, timeout = 180):
          super().__init__(timeout=timeout)
          self.add_item(FaqsMenu(server_id, call))
-
-
-class DeleteFaqsButtons(ui.View):
-    def __init__(self, faq_id, question, *, timeout=None):
-        super().__init__(timeout=timeout)
-        self.db = Database()
-        self.faq_id = faq_id
-        self.question = question
-        
-
-    @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green)
-    async def confirm(self, interaction: Interaction, button: ui.Button):
-        faq_id = self.faq_id
-        question = self.question
-        self.db.query("DELETE FROM faqs_db WHERE faq_id = ?", faq_id)
-        embed = Embed(title="", description=f"FAQ `{question}` has been deleted!", color = discord.Color.green())
-        for child in self.children: #disables all buttons when one is pressed
-            child.disabled = True
-        await interaction.response.edit_message(embed=embed, view=self)
-
-    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red)
-    async def cancel(self, interaction: Interaction, button: ui.Button):
-        question = self.question
-        embed = Embed(title="", description=f"FAQ `{question}` was **not** deleted because the action was cancelled.", color = discord.Color.green())
-        for child in self.children: #disables all buttons when one is pressed
-            child.disabled = True 
-        await interaction.response.edit_message(embed=embed, view=self)
-
-
-        
-
-
-
-
-
-
-
 
 
 
@@ -113,17 +69,15 @@ class EventsMenu(ui.Select):
             super().__init__(placeholder="Select an event to delete", options=options)
     
     async def callback(self, interaction: Interaction):
-        event_id = self.values[0]
         if self.values[0] == "none":
             await interaction.response.defer()
             return
-        
         selection = self.db.query_fetch('''
             SELECT event_name, date, time, location, description, creator, datecreated FROM events_db WHERE event_id = ?
-            ''', (event_id,))
-        accepted_rows = self.db.query_fetch("SELECT COUNT(*) FROM responses_db WHERE event_id = ? AND response = ?" , (event_id, 'accepted',))
-        declined_rows = self.db.query_fetch("SELECT COUNT(*) FROM responses_db WHERE event_id = ? AND response = ?" , (event_id, 'declined',))
-        tentative_rows = self.db.query_fetch("SELECT COUNT(*) FROM responses_db WHERE event_id = ? AND response = ?" , (event_id, 'tentative',))
+            ''', (self.values[0],))
+        accepted_rows = self.db.query_fetch("SELECT COUNT(*) FROM responses_db WHERE event_id = ? AND response = ?" , (self.values[0], 'accepted',))
+        declined_rows = self.db.query_fetch("SELECT COUNT(*) FROM responses_db WHERE event_id = ? AND response = ?" , (self.values[0], 'declined',))
+        tentative_rows = self.db.query_fetch("SELECT COUNT(*) FROM responses_db WHERE event_id = ? AND response = ?" , (self.values[0], 'tentative',))
         
         
         if selection:
@@ -154,8 +108,8 @@ class EventsMenu(ui.Select):
                 embed.set_footer(text=f"Created by {creator} on {datecreated}")
                 await interaction.response.edit_message(embed=embed)
             elif self.call =='delete': 
-                self.db.query("DELETE FROM events_db WHERE event_id = ?", event_id)
-                self.db.query("DELETE FROM responses_db WHERE event_id = ?", event_id)
+                self.db.query("DELETE FROM events_db WHERE event_id = ?", self.values[0])
+                self.db.query("DELETE FROM responses_db WHERE event_id = ?", self.values[0])
                 embed = Embed(title="", description=f"Event `{event_name}` has been deleted!", color = discord.Color.green())
                 await interaction.response.send_message(embed=embed, ephemeral=True)
         else:
