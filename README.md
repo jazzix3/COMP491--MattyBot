@@ -70,5 +70,3 @@ DISCORD_BOT_TOKEN=yourbottokengoeshere
 `/events-- delete` - (Admins only) Displays a dropdown menu of event names stored in the database. When a user selects an event from the menu, the corresponding event is deleted from the events database as well as the responses from the responses database.
 
 `/events-- invite` - (Admins only)  Displays a dropdown menu of event names stored in the database. When a user selects an event from the menu, an invitation for a selected event is created and an embed is sent to the channel. Buttons are displayed so members can indicate whether they are "attending", "can't go", or "maybe". When a button is clicked, it updates the responses database with the member's RSVP and updates the original embed to display the number of attendees. This message can be seen by all members so any member can RSVP.
-
-`events-- viewresponses`- (Admins only) Displays a dropdown menu of event names stored in the database. When a user selects an event from the menu, it displays a list of all member's usernames who responded, categorized by "attending", "can't go", or "maybe".
