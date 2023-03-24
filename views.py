@@ -17,7 +17,7 @@ class FaqsMenu(ui.Select):
         if call == 'view':
             super().__init__(placeholder="Select a question to view the answer", options=options)
         elif call == 'delete': 
-            super().__init__(placeholder="Select an FAQ to delete", options=options)
+            super().__init__(placeholder="Select a FAQ to delete", options=options)
 
     async def callback(self, interaction: Interaction):
         faq_id = self.values[0]
@@ -43,6 +43,7 @@ class FaqsMenu(ui.Select):
                 embed2.add_field(name=" ", value=" ", inline=False)
                 embed2.add_field(name=" ", value=" ", inline=False)
                 embed2.add_field(name=f"`{question}`", value=answer, inline=False)
+                embed2.add_field(name="", value=" ", inline=False)
                 embed2.add_field(name="", value=" ", inline=False)
                 embed2.set_footer(text="⚠️ This action cannot be undone")
                 view = DeleteFaqsButtons(faq_id, question)
@@ -79,20 +80,10 @@ class DeleteFaqsButtons(ui.View):
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red)
     async def cancel(self, interaction: Interaction, button: ui.Button):
         question = self.question
-        embed = Embed(title="", description=f"FAQ `{question}` was **not** deleted because the action was cancelled.", color = discord.Color.green())
+        embed = Embed(title="", description=f"FAQ `{question}` was **not** deleted because the action was cancelled.", color = discord.Color.red())
         for child in self.children: #disables all buttons when one is pressed
             child.disabled = True 
         await interaction.response.edit_message(embed=embed, view=self)
-
-
-        
-
-
-
-
-
-
-
 
 
 
@@ -153,11 +144,19 @@ class EventsMenu(ui.Select):
                 embed.add_field(name=" ", value=" ", inline=False)
                 embed.set_footer(text=f"Created by {creator} on {datecreated}")
                 await interaction.response.edit_message(embed=embed)
-            elif self.call =='delete': 
-                self.db.query("DELETE FROM events_db WHERE event_id = ?", event_id)
-                self.db.query("DELETE FROM responses_db WHERE event_id = ?", event_id)
-                embed = Embed(title="", description=f"Event `{event_name}` has been deleted!", color = discord.Color.green())
-                await interaction.response.send_message(embed=embed, ephemeral=True)
+            elif self.call =='delete':
+                embed2 = Embed(title="Are you sure you want to DELETE this event?", description="", color=Color.blue())
+                embed2.add_field(name=" ", value=" ", inline=False)
+                embed2.add_field(name=" ", value=" ", inline=False)
+                embed2.add_field(name=f"`{event_name}`", value="", inline=False)
+                embed2.add_field(name="⏰ When", value=f"{date} at {time}", inline = True)
+                embed2.add_field(name="📍 Where", value=location, inline = True)
+                embed2.add_field(name="", value=" ", inline=False)
+                embed2.add_field(name="", value=" ", inline=False)
+                embed2.set_footer(text="⚠️ This action cannot be undone")
+                view = DeleteEventButtons(event_id, event_name)
+                await interaction.response.edit_message(embed=embed2, view=view) 
+                
         else:
             embed = Embed(title="", description=f"Oops! Something went wrong. Try again or contact support.", color = discord.Color.red())
             await interaction.response.send_message(embed=embed, ephemeral=True)
@@ -167,3 +166,33 @@ class EventsView(ui.View):
      def __init__(self, server_id, call, *, timeout = 180):
          super().__init__(timeout=timeout)
          self.add_item(EventsMenu(server_id, call))
+
+
+
+
+class DeleteEventButtons(ui.View):
+    def __init__(self, event_id, event_name, *, timeout=None):
+        super().__init__(timeout=timeout)
+        self.db = Database()
+        self.event_id = event_id
+        self.event_name = event_name
+        
+
+    @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green)
+    async def confirm(self, interaction: Interaction, button: ui.Button):
+        event_id = self.event_id
+        event_name = self.event_name
+        self.db.query("DELETE FROM events_db WHERE event_id = ?", event_id)
+        self.db.query("DELETE FROM responses_db WHERE event_id = ?", event_id)
+        embed = Embed(title="", description=f"`{event_name}` has been deleted!", color = discord.Color.green())
+        for child in self.children: #disables all buttons when one is pressed
+            child.disabled = True
+        await interaction.response.edit_message(embed=embed, view=self)
+
+    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red)
+    async def cancel(self, interaction: Interaction, button: ui.Button):
+        event_name = self.event_name
+        embed = Embed(title="", description=f"`{event_name}` was **not** deleted because the action was cancelled.", color = discord.Color.red())
+        for child in self.children: #disables all buttons when one is pressed
+            child.disabled = True 
+        await interaction.response.edit_message(embed=embed, view=self)
