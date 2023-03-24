@@ -16,8 +16,10 @@ class EventInviteMenu(ui.Select):
 
         if call == 'invite':
             super().__init__(placeholder="Select an event to send an invitation", options=options)
+        elif call =='memberrsvp': 
+            super().__init__(placeholder="Select an event to RSVP", options=options)
         elif call =='responses': 
-            super().__init__(placeholder="Select an event to view its RSVP responses", options=options)        
+            super().__init__(placeholder="Select an event to view its RSVP responses", options=options)
 
 
     async def callback(self, interaction: Interaction):
@@ -32,6 +34,10 @@ class EventInviteMenu(ui.Select):
                 embed = EventInviteEmbed(event_id=event_id)
                 view = EventInviteButtons(event_id)
                 await interaction.response.send_message(embed=embed, view=view)
+            elif self.call == 'memberrsvp': 
+                embed = EventInviteEmbed(event_id=event_id)
+                view = EventInviteButtons(event_id)
+                await interaction.response.send_message(embed=embed, view=view, ephemeral=True, delete_after=30)
             elif self.call == 'responses':
                 embed = EventResponsesEmbed(event_id=event_id)
                 await interaction.response.edit_message(embed=embed)
@@ -64,7 +70,8 @@ class EventInviteButtons(ui.View):
             response_embed = Embed(title="✅ You are attending!", description=f"See you there, {username}! Thank you for responding to this event.", color = Color.blue())
             await interaction.followup.send(embed=response_embed, ephemeral=True)
         else:
-            await interaction.response.send_message(content="Oops! Something went wrong", ephemeral=True)
+            embed = Embed(title="", description=f"Oops! Something went wrong. Try again or contact support.", color = discord.Color.red())
+            await interaction.response.send_message(embed=embed, ephemeral=True)
 
 
     @discord.ui.button(label="Can't Go", style=discord.ButtonStyle.red)
@@ -79,7 +86,8 @@ class EventInviteButtons(ui.View):
             response_embed = Embed(title="❌ Sorry you can't go!", description=f"Hope to see you next time, {username}! Thank you for responding to this event.", color = Color.blue())
             await interaction.followup.send(embed=response_embed, ephemeral=True)
         else:
-            await interaction.response.send_message(content="Oops! Something went wrong", ephemeral=True)
+            embed = Embed(title="", description=f"Oops! Something went wrong. Try again or contact support.", color = discord.Color.red())
+            await interaction.response.send_message(embed=embed, ephemeral=True)
 
 
     @discord.ui.button(label="Maybe", style=discord.ButtonStyle.grey)
@@ -94,7 +102,8 @@ class EventInviteButtons(ui.View):
             response_embed = Embed(title="❔ We marked you as 'maybe', and we hope you can make it!", description="Update your RSVP anytime using command **/event- RSVP**. Thank you for responding to this event.", color = Color.blue())
             await interaction.followup.send(embed=response_embed, ephemeral=True)
         else:
-            await interaction.response.send_message(content="Oops! Something went wrong", ephemeral=True)
+            embed = Embed(title="", description=f"Oops! Something went wrong. Try again or contact support.", color = discord.Color.red())
+            await interaction.response.send_message(embed=embed, ephemeral=True)
 
 
     async def update_response(self, username, response):

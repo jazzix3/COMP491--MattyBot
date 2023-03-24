@@ -16,7 +16,7 @@ class FaqsMenu(ui.Select):
 
         if call == 'view':
             super().__init__(placeholder="Select a question to view the answer", options=options)
-        else: 
+        elif call == 'delete': 
             super().__init__(placeholder="Select an FAQ to delete", options=options)
 
     async def callback(self, interaction: Interaction):
@@ -36,11 +36,13 @@ class FaqsMenu(ui.Select):
                 embed.add_field(name=" ", value=" ", inline=False)
                 embed.set_footer(text=f"Created by {creator} on {datecreated}")
                 await interaction.response.edit_message(embed=embed)
-            else: 
+            elif self.call == 'delete': 
                 self.db.query("DELETE FROM faqs_db WHERE faq_id = ?", self.values[0])
-                await interaction.response.send_message(content="FAQ deleted!", ephemeral=True)
+                embed = Embed(title="", description=f"FAQ `{question}` has been deleted!", color = discord.Color.green())
+                await interaction.response.send_message(embed=embed, ephemeral=True)
         else:
-            await interaction.response.send_message(content="Oops! Something went wrong", ephemeral=True)
+            embed = Embed(title="", description=f"Oops! Something went wrong. Try again or contact support.", color = discord.Color.red())
+            await interaction.response.send_message(embed=embed, ephemeral=True)
 
 
 class FaqsView(ui.View):
@@ -105,12 +107,14 @@ class EventsMenu(ui.Select):
                 embed.add_field(name=" ", value=" ", inline=False)
                 embed.set_footer(text=f"Created by {creator} on {datecreated}")
                 await interaction.response.edit_message(embed=embed)
-            else: 
+            elif self.call =='delete': 
                 self.db.query("DELETE FROM events_db WHERE event_id = ?", self.values[0])
                 self.db.query("DELETE FROM responses_db WHERE event_id = ?", self.values[0])
-                await interaction.response.send_message(content="Event deleted!", ephemeral=True)
+                embed = Embed(title="", description=f"Event `{event_name}` has been deleted!", color = discord.Color.green())
+                await interaction.response.send_message(embed=embed, ephemeral=True)
         else:
-            await interaction.response.send_message(content="Oops! Something went wrong", ephemeral=True)
+            embed = Embed(title="", description=f"Oops! Something went wrong. Try again or contact support.", color = discord.Color.red())
+            await interaction.response.send_message(embed=embed, ephemeral=True)
 
 
 class EventsView(ui.View):
