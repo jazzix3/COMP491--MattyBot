@@ -1,6 +1,7 @@
 from discord import ui, TextStyle, Interaction, Embed, Color
 from matty_db import Database 
 from datetime import datetime
+from testcal import GoogleCalEvents
 
 
 class AddFaqModal(ui.Modal, title="Add to FAQ"):
@@ -49,22 +50,31 @@ class AddEventModal(ui.Modal, title="Add an Event"):
         timestamp = datetime.now()
         datecreated = timestamp.strftime(f"%m/%d/%Y")
     
-        embed = Embed(title="Success! A new event has been added.", description="To send an invitation for this event, type command **/eventinvite**", color = Color.green())
-        embed.add_field(name="Name of Event", value=self.event_name, inline=False)
-        embed.add_field(name="Start date", value=self.date, inline=True)
-        embed.add_field(name="Start time", value=self.time, inline=True)
-        embed.add_field(name="Location", value=self.location, inline=False)
-        embed.add_field(name="Description", value=self.description, inline=False)
-        embed.add_field(name=" ", value=" ", inline=False)
-        embed.add_field(name=" ", value=" ", inline=False)
-        embed.set_footer(text=f"Created by {creator} on {datecreated}")
+        
 
         try:
             sql = "INSERT INTO events_db(server_id, event_name, date, time, location, description, creator, datecreated) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
             val = (server_id, self.event_name.value, self.date.value, self.time.value, self.location.value, self.description.value, creator, datecreated)
             self.db.query_input(sql, val)
+
+            event_name = self.event_name.value
+            location = self.location.value
+            description = self.description.value
+            GoogleCalEvents.CreateEvent(event_name, location, description)
+
+            embed = Embed(title="Success! A new event has been added.", description="To send an invitation for this event, type command **/eventinvite**",color = Color.green())
+            embed.add_field(name="Name of Event", value=self.event_name, inline=False)
+            embed.add_field(name="Start date", value=self.date, inline=True)
+            embed.add_field(name="Start time", value=self.time, inline=True)
+            embed.add_field(name="Location", value=self.location, inline=False)
+            embed.add_field(name="Description", value=self.description, inline=False)
+            embed.add_field(name=" ", value=" ", inline=False)
+            embed.add_field(name=" ", value=" ", inline=False)
+            embed.set_footer(text=f"Created by {creator} on {datecreated}")
+
         except Exception as error:
             print(f"Error occurred while executing query: {error}")
             await interaction.response.send_message("Oops! Something went wrong while adding a new event.", ephemeral=True)
         else:
             await interaction.response.send_message(embed=embed, ephemeral=True)
+           

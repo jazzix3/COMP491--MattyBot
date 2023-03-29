@@ -36,7 +36,7 @@ class Client(commands.Bot):
         synced = await self.tree.sync()
         print(prfx + Style.NORMAL + " Number of cogs loaded: "  + Fore.YELLOW + str(len(self.coglist)))
         #print(prfx + " Number of slash commands synced: " + Fore.YELLOW + str(len(synced)))
-        runCalendar()
+        RunCalendar()
         print(prfx + Style.NORMAL + " Logged into Google Calendar id: "  + Fore.YELLOW + "***(will add id later)***")
             
 
@@ -44,7 +44,7 @@ class Client(commands.Bot):
 
 
 
-def runCalendar():
+def RunCalendar():
     creds = None
     SCOPES = ['https://www.googleapis.com/auth/calendar']
 
