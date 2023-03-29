@@ -23,7 +23,7 @@ class Client(commands.Bot):
         intents.members = True
         intents.message_content = True
         super().__init__(command_prefix=commands.when_mentioned_or("!"), intents=intents) 
-        self.coglist = ['cogs.faqs', 'cogs.events', 'cogs.exampleDB']
+        self.coglist = ['cogs.event_add', 'cogs.eventcommands', 'cogs.exampleDB', 'cogs.faqcommands']
 
     async def setup_hook(self) -> None:
         for cog in self.coglist:
@@ -62,12 +62,6 @@ def RunCalendar():
         with open('cal_token.json', 'w') as token:
             token.write(creds.to_json())
 
-
- 
-
-    
-
-   
 
 
 

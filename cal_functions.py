@@ -8,9 +8,9 @@ creds = Credentials.from_authorized_user_file('cal_token.json', SCOPES)
 service = build('calendar', 'v3', credentials=creds)
 
 
-class GoogleCalEvents():
+class GoogleCalendarEvents():
 
-    def CreateEvent(event_name, location, description):
+    def AddToCalendar(event_name, location, description):
         event_name = event_name
         location = location
         description = description

@@ -20,10 +20,12 @@ class Database():
             event_id INTEGER PRIMARY KEY AUTOINCREMENT,
             server_id INTEGER,
             event_name TEXT,
-            date TEXT,
-            time TEXT,
-            location TEXT,
             description TEXT,
+            location TEXT,
+            start_date TEXT,
+            start_time TEXT,
+            end_date TEXT,
+            end_time TEXT,
             creator TEXT,
             datecreated TEXT
             )

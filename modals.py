@@ -1,7 +1,8 @@
 from discord import ui, TextStyle, Interaction, Embed, Color
 from matty_db import Database 
 from datetime import datetime
-from testcal import GoogleCalEvents
+from cal_functions import GoogleCalendarEvents
+
 
 
 class AddFaqModal(ui.Modal, title="Add to FAQ"):
@@ -60,7 +61,7 @@ class AddEventModal(ui.Modal, title="Add an Event"):
             event_name = self.event_name.value
             location = self.location.value
             description = self.description.value
-            GoogleCalEvents.CreateEvent(event_name, location, description)
+            GoogleCalendarEvents.AddToCalendar(event_name, location, description)
 
             embed = Embed(title="Success! A new event has been added.", description="To send an invitation for this event, type command **/eventinvite**",color = Color.green())
             embed.add_field(name="Name of Event", value=self.event_name, inline=False)
