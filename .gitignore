@@ -1,7 +1,9 @@
 __pycache__
 cog.__pycache__
-venv
 .env
 matty_db.sqlite
-eventinvite_save.py
-eventinvite_savev2.py
+
+# keep secret
+cal_token.json
+cal_credentials.json
+venv
