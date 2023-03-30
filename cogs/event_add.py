@@ -11,43 +11,37 @@ class AddEvent(commands.Cog):
         self.client = client
         self.db = Database()
 
-    admin = app_commands.Group(name="modals", description="Frequently Asked Questions")
-
-    @admin.command(name="test", description="Add a question & answer to FAQs (Admins only)")
-    @app_commands.checks.has_role("MattyBotAdmin")
-    async def testadd(self, interaction: Interaction) -> None:
-        await interaction.response.send_modal(Modal1()) 
-    @testadd.error
-    async def testadd(self, interaction:Interaction, error):
-        await interaction.response.send_message(embed=AdminErrorEmbed(), ephemeral=True) 
-
 
 class Modal1(ui.Modal, title="Add an Event (Page 1 of 2)"):
     event_name = ui.TextInput(label="Event Name", style=TextStyle.short, required=True)
     description = ui.TextInput(label="Description", style=TextStyle.long, required=True)
+    location = ui.TextInput(label="Location", style=TextStyle.short, required=True)
     
-
     async def on_submit(self, interaction: Interaction):
         embed = Embed(title="Is this event information is correct? (Page 1 of 2)", description="", color=discord.Color.green())
         embed.add_field(name="Event Name", value=self.event_name, inline=False)
         embed.add_field(name="Description", value=self.description, inline=False)
-        view = Buttons1(self.event_name, self.description, interaction)
+        embed.add_field(name="Location", value=self.location, inline=False)
+        
+        view = Buttons1(self.event_name, self.description, self.location, interaction)
         await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
 
 
 class Buttons1(ui.View):
-    def __init__(self, event_name, description, interaction, *, timeout=None):
+    def __init__(self, event_name, description, location, interaction, *, timeout=None):
         super().__init__(timeout=timeout)
         self.db = Database()
         self.event_name = event_name
         self.description = description
+        self.location = location
         self.interaction = interaction
 
     @discord.ui.button(label="Yes, continue", style=discord.ButtonStyle.green)
     async def confirm(self, interaction: Interaction, button: ui.Button):
         event_name = self.event_name
         description = self.description
-        await interaction.response.send_modal(Modal2(event_name,description))
+        location = self.location
+        await interaction.response.send_modal(Modal2(event_name, description, location))
         
     @discord.ui.button(label="No, cancel", style=discord.ButtonStyle.red)
     async def cancel(self, interaction: Interaction, button: ui.Button):
@@ -58,21 +52,21 @@ class Buttons1(ui.View):
 
 
 class Modal2(ui.Modal, title="Add an Event (Page 2 of 2)"):
-    def __init__(self, event_name, description, *, timeout=None):
+    def __init__(self, event_name, description, location, *, timeout=None):
         super().__init__(timeout=timeout)
         self.db = Database()
         self.event_name = event_name
         self.description= description
-
-    location = ui.TextInput(label="Location", style=TextStyle.short, required=True)
-    start_date = ui.TextInput(label="Start Date", style=TextStyle.short, required=True)
-    start_time = ui.TextInput(label="Start Time", style=TextStyle.short, required=True)
-    end_date = ui.TextInput(label="End Date", style=TextStyle.short, required=True)
-    end_time = ui.TextInput(label="End Time", style=TextStyle.short, required=True)
+        self.location = location
+  
+    start_date = ui.TextInput(label="Start Date in YYYY-MM-DD (e.g. 2023-05-19)", style=TextStyle.short, required=True, min_length=10, max_length=10, placeholder="YYYY-MM-DD")
+    start_time = ui.TextInput(label="Start Time in HH:MM (e.g. 08:00 = 8:00 AM)", style=TextStyle.short, required=True, min_length=5, max_length=5, placeholder= "HH:MM")
+    end_date = ui.TextInput(label="End Date in YYYY-MM-DD", style=TextStyle.short, required=True, min_length=10, max_length=10, placeholder= "YYYY-MM-DD")
+    end_time = ui.TextInput(label="End Time in HH:MM (e.g. 14:00 = 2:00 PM)", style=TextStyle.short, required=True, min_length=5, max_length=5, placeholder="HH:MM")
 
     async def on_submit(self, interaction: Interaction):
         embed2 = Embed(title="Is this event information correct? (Page 2 of 2)", description="", color=discord.Color.green())
-        embed2.add_field(name="Location", value=self.location, inline=False)
+        
         embed2.add_field(name="Start date", value=self.start_date, inline=False)
         embed2.add_field(name="Start time", value=self.start_time, inline=False)
         embed2.add_field(name="End date", value=self.end_date, inline=False)
@@ -161,7 +155,11 @@ class Buttons3(ui.View):
             embed4.add_field(name=" ", value=" ", inline=False)
             embed4.add_field(name=" ", value=" ", inline=False)
             embed4.add_field(name=f"`{self.event_name}`", value=self.description, inline=False)
+            embed4.add_field(name=" ", value=" ", inline=False)
+            embed4.add_field(name=" ", value=" ", inline=False)
             embed4.add_field(name="📍 Location", value=self.location, inline=False)
+            embed4.add_field(name=" ", value=" ", inline=False)
+            embed4.add_field(name=" ", value=" ", inline=False)
             embed4.add_field(name="📅 Start date", value=self.start_date, inline=True)
             embed4.add_field(name="⏰ Start time", value=self.start_time, inline=True)
             embed4.add_field(name=" ", value=" ", inline=False)
@@ -179,13 +177,16 @@ class Buttons3(ui.View):
 
         except Exception as error:
             print(f"Error occurred while executing query: {error}")
-            await interaction.response.edit_message("Oops! Something went wrong while adding a new event.")
+            embed5 = Embed(title="Oops! Something went wrong while adding a new event.", description="",color = Color.red())
+            embed5.add_field(name=" ", value="Check that the date and times are correctly formatted.", inline=False)
+            embed5.add_field(name=" ", value="Ensure that the start date and time does not occur after the end date and time.", inline=False)
+            embed5.add_field(name=" ", value=" ", inline=False)
+            embed5.add_field(name=" ", value=" ", inline=False)
+            embed5.add_field(name="Please try again. If the problem persists, contact support.", value=" ", inline=False)
+            for child in self.children: 
+                child.disabled = True
+            await interaction.response.edit_message(embed=embed5, view=self)
         
-
-
-
-
-       
 
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red)
     async def cancel(self, interaction: Interaction, button: ui.Button):
@@ -195,12 +196,6 @@ class Buttons3(ui.View):
         await interaction.response.edit_message(embed=embed, view=self) 
         
 
-class AdminErrorEmbed(Embed):
-    def __init__(self):
-        super().__init__()
-        self.db = Database()
-
-        super().__init__(title="", description=f"You must have the role `MattyBotAdmin` to use that command", color=Color.red())        
 
 async def setup(client: commands.Bot) -> None:
     await client.add_cog(AddEvent(client))
