@@ -2,9 +2,9 @@ import discord
 from discord import app_commands, ui,  Interaction, Embed, SelectOption, Color
 from discord.ext import commands
 from matty_db import Database
-from modals import AddEventModal
 from views import EventsView
 from eventinvite import EventInviteView
+from cogs.event_add import Modal1
 
 
 
@@ -52,7 +52,7 @@ class EventCommands(commands.Cog):
     @admin.command(name="add", description="Add a new event (Admins only)")
     @app_commands.checks.has_role("MattyBotAdmin")
     async def add(self, interaction: Interaction):
-        await interaction.response.send_modal(AddEventModal())
+        await interaction.response.send_modal(Modal1())
     @add.error
     async def adderror(self, interaction:Interaction, error):
         await interaction.response.send_message(embed=AdminErrorEmbed(), ephemeral=True)
