@@ -8,8 +8,6 @@ from colorama import Back, Fore, Style
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
-from googleapiclient.discovery import build
-#from googleapiclient.errors import HttpError
 
 
 class Client(commands.Bot):
@@ -19,7 +17,7 @@ class Client(commands.Bot):
         intents.members = True
         intents.message_content = True
         super().__init__(command_prefix=commands.when_mentioned_or("!"), intents=intents) 
-        self.coglist = ['cogs.event_add', 'cogs.eventcommands', 'cogs.exampleDB', 'cogs.faqcommands']
+        self.coglist = ['cogs.events_add', 'cogs.eventcommands', 'cogs.exampleDB', 'cogs.faqscommands']
 
     async def setup_hook(self) -> None:
         for cog in self.coglist:
