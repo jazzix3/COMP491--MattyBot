@@ -2,15 +2,16 @@ import discord
 from discord import app_commands, ui,  Interaction, Embed, SelectOption, Color
 from discord.ext import commands
 from matty_db import Database
-from modals import AddFaqModal
-from views import FaqsView
+from cogs.faqs_view_or_delete import FaqsView
+from cogs.faqs_add_or_clearall import AddFaqModal, ClearAllEmbed, ClearAllButtons
 
 
 
-class FAQCommands(commands.Cog):
+class FAQsCommands(commands.Cog):
     def __init__(self, client: commands.Bot) -> None:
         self.client = client
         self.db = Database()
+        
 
     member = app_commands.Group(name="faqs-", description="Frequently Asked Questions") 
     admin = app_commands.Group(name="faqs--", description="Frequently Asked Questions")
@@ -21,12 +22,12 @@ class FAQCommands(commands.Cog):
         await interaction.response.send_message(view=FaqsView(server_id, call='view'), ephemeral=True)
 
 
-    @member.command(name="list", description="View a list of all FAQs")
+    @member.command(name="list", description="View a list of all questions")
     async def list(self, interaction: Interaction) -> None:
         server_id = interaction.guild_id
         rows = self.db.query_fetch("SELECT question FROM faqs_db WHERE server_id = ?", (server_id,))
         if rows:
-            embed = Embed(title="List of all FAQ", description="To see all FAQs with answers, type command **/faqs**", color = Color.orange())
+            embed = Embed(title="List of all questions", description="To see all FAQs with answers, type command **/faqs**", color = Color.orange())
             count = 1
             for row in rows:
                 question = row[0]
@@ -50,9 +51,7 @@ class FAQCommands(commands.Cog):
     @admin.command(name="clearall", description="Clear all FAQs from the database (Admins only)")
     @app_commands.checks.has_role("MattyBotAdmin")
     async def clearall(self, interaction: Interaction) -> None:
-        self.db.query("DELETE FROM faqs_db")
-        embed = Embed(title="Clear all FAQs", description="Success! All FAQs have been cleared from the database", color=Color.green())
-        await interaction.response.send_message(embed=embed, ephemeral=True)
+        await interaction.response.send_message(embed=ClearAllEmbed(), view=ClearAllButtons(), ephemeral=True)
     @clearall.error
     async def clearallerror(self, interaction:Interaction, error):
         await interaction.response.send_message(embed=AdminErrorEmbed(), ephemeral=True) 
@@ -71,11 +70,8 @@ class FAQCommands(commands.Cog):
 
 class AdminErrorEmbed(Embed):
     def __init__(self):
-        super().__init__()
-        self.db = Database()
-
         super().__init__(title="", description=f"You must have the role `MattyBotAdmin` to use that command", color=Color.red())
         
 
 async def setup(client: commands.Bot) -> None:
-    await client.add_cog(FAQCommands(client))
+    await client.add_cog(FAQsCommands(client))

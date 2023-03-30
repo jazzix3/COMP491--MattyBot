@@ -19,7 +19,7 @@ class Client(commands.Bot):
         intents.members = True
         intents.message_content = True
         super().__init__(command_prefix=commands.when_mentioned_or("!"), intents=intents) 
-        self.coglist = ['cogs.event_add', 'cogs.eventcommands', 'cogs.exampleDB', 'cogs.faqcommands']
+        self.coglist = ['cogs.event_add', 'cogs.eventcommands', 'cogs.exampleDB', 'cogs.faqscommands']
 
     async def setup_hook(self) -> None:
         for cog in self.coglist:
@@ -35,10 +35,6 @@ class Client(commands.Bot):
         CalendarSetup()
         print(prfx + Style.NORMAL + " Logged into Google Calendar id: "  + Fore.YELLOW + "***(will add id later)***")
             
-
-
-
-
 
 def CalendarSetup():
     creds = None

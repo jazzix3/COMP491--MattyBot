@@ -2,7 +2,7 @@ import discord
 from discord import app_commands, ui,  Interaction, Embed, SelectOption, Color
 from discord.ext import commands
 from matty_db import Database
-from views import EventsView
+from cogs.events_view_or_delete import EventsView 
 from eventinvite import EventInviteView
 from cogs.event_add import Modal1
 
