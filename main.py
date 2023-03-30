@@ -12,10 +12,6 @@ from googleapiclient.discovery import build
 #from googleapiclient.errors import HttpError
 
 
-
-
-
-
 class Client(commands.Bot):
     def __init__(self) -> None:
         intents = discord.Intents.default()

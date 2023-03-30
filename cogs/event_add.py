@@ -2,6 +2,7 @@ import discord
 from discord import app_commands, ui,  Interaction, Embed, TextStyle, Color
 from discord.ext import commands
 from matty_db import Database
+from datetime import datetime
 
 
 class AddEvent(commands.Cog):
@@ -116,7 +117,7 @@ class Buttons2(ui.View):
         embed3.add_field(name=" ", value=" ", inline=False)
         embed3.add_field(name="📅 End date", value=end_date, inline=True)
         embed3.add_field(name="⏰ End time", value=end_time, inline=True)
-        view3 = Buttons3(self.event_name, self.description, self.location, self.start_date, interaction)
+        view3 = Buttons3(self.event_name, self.description, self.location, self.start_date, self.start_time, self.end_date, self.end_time, interaction)
         await interaction.response.edit_message(embed=embed3, view=view3)
 
     @discord.ui.button(label="No, cancel", style=discord.ButtonStyle.red)
@@ -128,21 +129,57 @@ class Buttons2(ui.View):
 
 
 class Buttons3(ui.View):
-    def __init__(self, event_name, description, location, start_date, interaction, *, timeout=None):
+    def __init__(self, event_name, description, location, start_date, start_time, end_date, end_time, interaction, *, timeout=None):
         super().__init__(timeout=timeout)
         self.db = Database()
         self.event_name = event_name
         self.description = description
         self.location = location
         self.start_date = start_date
+        self.start_time = start_time
+        self.end_date = end_date
+        self.end_time = end_time
         self.interaction = interaction
-
+        
     @discord.ui.button(label="Add Event to Calendar", style=discord.ButtonStyle.green)
     async def confirm(self, interaction: Interaction, button: ui.Button):
-        embed4 = Embed(title="It worked!", description=" ", color=discord.Color.green())
-        for child in self.children: 
-            child.disabled = True
-        await interaction.response.edit_message(embed=embed4, view=self)
+        server_id = interaction.guild_id
+        creator = interaction.user.name
+        timestamp = datetime.now()
+        datecreated = timestamp.strftime(f"%m/%d/%Y")
+
+        try:
+            sql = "INSERT INTO events_db(server_id, event_name, description, location, start_date, start_time, end_date, end_time, creator, datecreated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+            val = (server_id, self.event_name.value, self.description.value, self.location.value, self.start_date.value, self.start_time.value, self.end_date.value, self.end_time.value, creator, datecreated)
+            self.db.query_input(sql,val)
+            #GoogleCalendarEvents.AddToCalendar(event_name, location, description)
+
+            embed4 = Embed(title="Success! A new event has been added.", description="To send an invitation for this event, type command **/eventinvite**",color = Color.green())
+            embed4.add_field(name="Name of Event", value=self.event_name, inline=False)
+            embed4.add_field(name="Description", value=self.description, inline=False)
+            embed4.add_field(name="Location", value=self.location, inline=False)
+            embed4.add_field(name="Start date", value=self.start_date, inline=True)
+            embed4.add_field(name="Start time", value=self.start_time, inline=True)
+            embed4.add_field(name=" ", value=" ", inline=False)
+            embed4.add_field(name=" ", value=" ", inline=False)
+            embed4.add_field(name="📅 End date", value=self.end_date, inline=True)
+            embed4.add_field(name="⏰ End time", value=self.end_time, inline=True)
+            embed4.add_field(name=" ", value=" ", inline=False)
+            embed4.add_field(name=" ", value=" ", inline=False)
+            embed4.set_footer(text=f"Created by {creator} on {datecreated}")
+            for child in self.children: 
+                child.disabled = True
+            await interaction.response.edit_message(embed=embed4, view=self)
+
+        except Exception as error:
+            print(f"Error occurred while executing query: {error}")
+            await interaction.response.send_message("Oops! Something went wrong while adding a new event.", ephemeral=True)
+        
+
+
+
+
+       
 
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red)
     async def cancel(self, interaction: Interaction, button: ui.Button):
@@ -152,8 +189,18 @@ class Buttons3(ui.View):
         await interaction.response.edit_message(embed=embed, view=self) 
 
 
+    
+        
 
         
+
+
+
+
+
+
+           
+
 
 
 
