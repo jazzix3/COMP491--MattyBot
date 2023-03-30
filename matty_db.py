@@ -17,7 +17,7 @@ class Database():
             '''
         create_events_table = '''
             CREATE TABLE IF NOT EXISTS events_db(
-            event_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            event_id TEXT PRIMARY KEY,
             server_id INTEGER,
             event_name TEXT,
             description TEXT,
@@ -26,6 +26,7 @@ class Database():
             start_time TEXT,
             end_date TEXT,
             end_time TEXT,
+            event_link TEXT,
             creator TEXT,
             datecreated TEXT
             )
