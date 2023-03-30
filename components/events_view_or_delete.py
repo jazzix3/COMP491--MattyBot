@@ -3,7 +3,7 @@ from discord import ui,  Interaction, Embed, SelectOption, Color
 from matty_db import Database
 
 
-class EventsDropDownMenu(ui.Select):
+class EventsDropdownMenu(ui.Select):
     def __init__(self, server_id, call):
         self.db = Database()
         self.call = call
@@ -80,7 +80,7 @@ class EventsDropDownMenu(ui.Select):
 class EventsView(ui.View):
      def __init__(self, server_id, call, *, timeout = 180):
          super().__init__(timeout=timeout)
-         self.add_item(EventsDropDownMenu(server_id, call))
+         self.add_item(EventsDropdownMenu(server_id, call))
 
 
 class DeleteEventButtons(ui.View):

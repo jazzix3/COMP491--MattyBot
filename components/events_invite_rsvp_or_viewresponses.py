@@ -4,7 +4,7 @@ from matty_db import Database
 
 
 
-class EventInviteMenu(ui.Select):
+class EventInviteDropdownMenu(ui.Select):
     def __init__(self, server_id, call):
         self.db = Database()
         self.call = call
@@ -48,7 +48,7 @@ class EventInviteMenu(ui.Select):
 class EventInviteView(ui.View):
     def __init__(self, server_id, call, *, timeout = None):
          super().__init__(timeout=timeout)
-         self.add_item(EventInviteMenu(server_id, call))         
+         self.add_item(EventInviteDropdownMenu(server_id, call))         
 
 
 
