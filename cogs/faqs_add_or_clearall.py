@@ -63,10 +63,3 @@ class ClearAllButtons(ui.View):
         for child in self.children: #disables all buttons when one is pressed
             child.disabled = True 
         await interaction.response.edit_message(embed=embed, view=self)
-
-
-
-
-
-
-           
