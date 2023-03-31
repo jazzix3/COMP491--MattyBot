@@ -67,14 +67,23 @@ class EventInviteButtons(ui.View):
         if await self.update_response(username, response):
             event_id = self.event_id
             call = self.call
+
+            selection = self.db.query_fetch("SELECT event_link FROM events_db WHERE event_id = ?", (event_id,))
+            event_link = selection[0][0]
+
             if call == 'invite':
                 new_embed = EventInviteEmbed(event_id)
                 new_view = EventInviteButtons(event_id, call)           
                 await interaction.response.edit_message(embed=new_embed, view=new_view)
-                response_embed = Embed(title="✅ You are attending!", description=f"See you there, {username}! Thank you for responding to this event.", color = Color.blue())
+                response_embed = Embed(title="✅  You are attending!", description=f"See you there, {username}! Thank you for responding to this event.", color = Color.blue())
+                response_embed.add_field(name=" ", value=" ", inline=False)
+                response_embed.add_field(name="Link to Google Calendar:", value=f"{event_link}", inline=False)
                 await interaction.followup.send(embed=response_embed, ephemeral=True)
+
             elif call == 'memberrsvp':
-                response_embed = Embed(title="✅ You are attending!", description=f"See you there, {username}! Thank you for responding to this event.", color = Color.blue())
+                response_embed = Embed(title="✅  You are attending!", description=f"See you there, {username}! Thank you for responding to this event.", color = Color.blue())
+                response_embed.add_field(name=" ", value=" ", inline=False)
+                response_embed.add_field(name="Link to Google Calendar:", value=f"{event_link}", inline=False)
                 for child in self.children: #disables all buttons when one is pressed
                     child.disabled = True
                 await interaction.response.edit_message(embed=response_embed, view=self)               
@@ -94,10 +103,10 @@ class EventInviteButtons(ui.View):
                 new_embed = EventInviteEmbed(event_id)
                 new_view = EventInviteButtons(event_id, call)           
                 await interaction.response.edit_message(embed=new_embed, view=new_view)
-                response_embed = Embed(title="❌ Sorry you can't go!", description=f"Hope to see you next time, {username}! Thank you for responding to this event.", color = Color.blue())
+                response_embed = Embed(title="❌  Sorry you can't go!", description=f"Hope to see you next time, {username}! Thank you for responding to this event.", color = Color.blue())
                 await interaction.followup.send(embed=response_embed, ephemeral=True)
             elif call == 'memberrsvp':
-                response_embed = Embed(title="❌ Sorry you can't go!", description=f"Hope to see you next time, {username}! Thank you for responding to this event.", color = Color.blue())
+                response_embed = Embed(title="❌  Sorry you can't go!", description=f"Hope to see you next time, {username}! Thank you for responding to this event.", color = Color.blue())
                 for child in self.children: #disables all buttons when one is pressed
                     child.disabled = True
                 await interaction.response.edit_message(embed=response_embed, view=self)               
@@ -115,10 +124,10 @@ class EventInviteButtons(ui.View):
                 new_embed = EventInviteEmbed(event_id)
                 new_view = EventInviteButtons(event_id, call)           
                 await interaction.response.edit_message(embed=new_embed, view=new_view)
-                response_embed = Embed(title="❔ We marked you as 'maybe', and we hope you can make it!", description="Update your RSVP anytime using command **/event- RSVP**. Thank you for responding to this event.", color = Color.blue())
+                response_embed = Embed(title="❔  We marked you as 'maybe', and we hope you can make it!", description="Update your RSVP anytime using command **/event- RSVP**. Thank you for responding to this event.", color = Color.blue())
                 await interaction.followup.send(embed=response_embed, ephemeral=True)
             elif call == 'memberrsvp':
-                response_embed = Embed(title="❔ We marked you as 'maybe', and we hope you can make it!", description="Update your RSVP anytime using command **/event- RSVP**. Thank you for responding to this event.", color = Color.blue())
+                response_embed = Embed(title="❔  We marked you as 'maybe', and we hope you can make it!", description="Update your RSVP anytime using command **/event- RSVP**. Thank you for responding to this event.", color = Color.blue())
                 for child in self.children: #disables all buttons when one is pressed
                     child.disabled = True
                 await interaction.response.edit_message(embed=response_embed, view=self)
@@ -154,12 +163,14 @@ class EventInviteEmbed(Embed):
         self.event_id = event_id
         
 
-        selection = self.db.query_fetch("SELECT event_name, date, time, location, description FROM events_db WHERE event_id = ?", (self.event_id,))
+        selection = self.db.query_fetch("SELECT event_name, description, location, start_date, start_time, end_date, end_time FROM events_db WHERE event_id = ?", (self.event_id,))
         event_name = selection[0][0]
-        date = selection[0][1]
-        time = selection[0][2]
-        location = selection[0][3]
-        description = selection[0][4]
+        description = selection[0][1]
+        location = selection[0][2]
+        start_date = selection[0][3]
+        start_time = selection[0][4]
+        end_date = selection[0][5]
+        end_time = selection[0][6]
 
         accepted_rows = self.db.query_fetch("SELECT COUNT(*) FROM responses_db WHERE event_id = ? AND response = ?", (self.event_id, 'accepted',))
         declined_rows = self.db.query_fetch("SELECT COUNT(*) FROM responses_db WHERE event_id = ? AND response = ?", (self.event_id, 'declined',))
@@ -172,9 +183,11 @@ class EventInviteEmbed(Embed):
         self.add_field(name=" ", value=" ", inline=False)
         self.add_field(name=" ", value=" ", inline=False)
         self.add_field(name=" ", value=" ", inline=False)
-        self.add_field(name="⏰ When", value=f"{date} at {time}", inline=True)
-        self.add_field(name="📍 Where", value=location, inline=True)
+        self.add_field(name="⏰ Starts: ", value=f"{start_date} at {start_time}", inline = True)
+        self.add_field(name="⏰ Ends:", value=f"{end_date} at {end_time}", inline = True)
         self.add_field(name=" ", value=" ", inline=False)
+        self.add_field(name=" ", value=" ", inline=False)
+        self.add_field(name="📍 Location", value=location, inline = True)
         self.add_field(name=" ", value=" ", inline=False)
         self.add_field(name="Attending ✅ ", value=str(accepted_count), inline=True)
         self.add_field(name="Can't Go ❌", value=str(declined_count), inline=True)
@@ -193,11 +206,12 @@ class EventResponsesEmbed(Embed):
         self.db = Database()
         self.event_id = event_id
         
-        selection = self.db.query_fetch("SELECT event_name, date, time, location FROM events_db WHERE event_id = ?", (self.event_id,))
+        selection = self.db.query_fetch("SELECT event_name, start_date, start_time, end_date, end_time FROM events_db WHERE event_id = ?", (self.event_id,))
         event_name = selection[0][0]
-        date = selection[0][1]
-        time = selection[0][2]
-        location = selection[0][3]
+        start_date = selection[0][1]
+        start_time = selection[0][2]
+        end_date = selection[0][3]
+        end_time = selection[0][4]
 
         accepted_rows = self.db.query_fetch("SELECT username FROM responses_db WHERE event_id = ? AND response = ?", (self.event_id, 'accepted',))
         accepted_users = [row[0] for row in accepted_rows]
@@ -214,9 +228,8 @@ class EventResponsesEmbed(Embed):
         super().__init__(title=f"📬  RSVP responses for `{event_name}`", color=Color.blue())
         self.add_field(name=" ", value=" ", inline=False)
         self.add_field(name=" ", value=" ", inline=False)
-        self.add_field(name=" ", value=" ", inline=False)
-        self.add_field(name="⏰ When", value=f"{date} at {time}", inline=True)
-        self.add_field(name="📍 Where", value=location, inline=True)
+        self.add_field(name="⏰ Starts: ", value=f"{start_date} at {start_time}", inline = True)
+        self.add_field(name="⏰ Ends:", value=f"{end_date} at {end_time}", inline = True)
         self.add_field(name=" ", value=" ", inline=False)
         self.add_field(name=" ", value=" ", inline=False)
         self.add_field(name="Attending ✅ ", value=accepted_string, inline=True)
