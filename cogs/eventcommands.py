@@ -26,14 +26,14 @@ class EventCommands(commands.Cog):
     @member.command(name="list", description="View a list of all events")
     async def list(self, interaction: Interaction):
         server_id = interaction.guild_id
-        rows = self.db.query_fetch("SELECT event_name, date, time FROM events_db WHERE server_id = ? ORDER BY date", (server_id,))
+        rows = self.db.query_fetch("SELECT event_name, start_date, start_time FROM events_db WHERE server_id = ? ORDER BY start_date", (server_id,))
         if rows:
             embed = Embed(title="List of all events", description="For more information about an event, type command **/events**", color = Color.blue())
             for row in rows:
                 event_name = row[0]
-                date = row[1]
-                time = row[2]
-                embed.add_field(name=f"`{event_name}`", value=f"{date} at {time}", inline= False)
+                start_date = row[1]
+                start_time = row[2]
+                embed.add_field(name=f"`{event_name}`", value=f"{start_date} at {start_time}", inline= False)
             await interaction.response.send_message(embed=embed, ephemeral=True)
         else:
             embed2 = Embed(title="List of all events", description ="There are currently no events", color=Color.blue())
