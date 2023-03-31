@@ -2,6 +2,7 @@ import discord
 from discord import app_commands, ui,  Interaction, Embed, SelectOption, Color
 from discord.ext import commands
 from matty_db import Database
+from cal_functions import GoogleCalendarEvents
 
 
 class ExampleDB(commands.GroupCog, name="test"):
@@ -54,45 +55,63 @@ class ExampleDB(commands.GroupCog, name="test"):
                 "3/1/2023")
             self.db.query_input(faqsql,val)
 
-            eventsql = "INSERT INTO events_db(server_id, event_name, date, time, location, description, creator, datecreated) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
-            val = (server_id, 
-                "FIFA 23 Tournament", 
-                "3/6/2023",
-                "5:00 PM",
-                "Games Room, University Student Union",
-                "Kick it in the Games Room and compete against other Matadors in FIFA ‘23 tournaments this semester! These tournaments are a great way to have fun while also having the potential of scoring some awesome prizes!", 
-                "Jazzi", 
-                "2/14/2023")
-            self.db.query_input(eventsql,val)
+
+            event_name = "FIFA 23 Tournament"
+            description = "Kick it in the Games Room and compete against other Matadors in FIFA ‘23 tournaments this semester! These tournaments are a great way to have fun while also having the potential of scoring some awesome prizes!"
+            location = "Games Room, University Student Union"
+            start_date = "2023-04-01"
+            start_time =  "17:00"
+            end_date = "2023-04-01"
+            end_time = "20:00"
+            creator = "Jazzi"
+            datecreated = "3/30/2023"
+            event_link, event_id = GoogleCalendarEvents.AddToCalendar(event_name, description, location, start_date, start_time, end_date, end_time)
+        
+            sql = "INSERT INTO events_db(event_id, server_id, event_name, description, location, start_date, start_time, end_date, end_time, event_link, creator, datecreated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+            val = (event_id, server_id, event_name, description, location, start_date, start_time, end_date, end_time, event_link, creator, datecreated)
+            self.db.query_input(sql,val)
 
 
-            val = (server_id, 
-                "MataGame Night", 
-                "3/17/2023",
-                "7:00 PM",
-                "Games Room, University Student Union",
-                "This is MataGame Night! Come and join celebrate all things esports! Join us for a night of fun with free play and live exhibition matches across many games!", 
-                "Jazzi", 
-                "3/1/2023")
-            self.db.query_input(eventsql,val)
+            event_name = "MataGame Night"
+            description = "The University Student Union invites you to kick off the semester right at Matador Nights! Whether you want to dance the night away to awesome tunes provided by DJs, spruce up your Instagram feed with awe-inspiring photo ops or enjoy an amazing spread of FREE food—your perfect night starts here."
+            location = "Games Room, University Student Union"
+            start_date = "2023-04-02"
+            start_time =  "12:00"
+            end_date = "2023-04-02"
+            end_time = "15:00"
+            creator = "Jazzi"
+            datecreated = "3/30/2023"
+            event_link, event_id = GoogleCalendarEvents.AddToCalendar(event_name, description, location, start_date, start_time, end_date, end_time)
+        
+            sql = "INSERT INTO events_db(event_id, server_id, event_name, description, location, start_date, start_time, end_date, end_time, event_link, creator, datecreated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+            val = (event_id, server_id, event_name, description, location, start_date, start_time, end_date, end_time, event_link, creator, datecreated)
+            self.db.query_input(sql,val)
 
 
-            val = (server_id, 
-                "Super Smash Bros. Ultimate Tournament", 
-                "3/30/2023",
-                "5:00 PM",
-                "Games Room, University Student Union",
-                "The Games Room of the University Student Union invites players to fight their way to the top during the Super Smash Bros. Ultimate Tournament! Whether you’re a beginner entering your first tourney, or a seasoned wavedasher, everyone is welcome to battle it out on Nintendo Switch. Our first-place champions will go home with a $50 Amazon gift card, second will snag $25 Amazon gift card and third will walk away with a $15 Amazon gift card.", 
-                "Jazzi", 
-                "3/1/2023")
-            self.db.query_input(eventsql,val)
+            event_name = "Super Smash Brothers Tournament"
+            description = "The Games Room of the University Student Union invites players to fight their way to the top during the Super Smash Bros. Ultimate Tournament! Whether you’re a beginner entering your first tourney, or a seasoned wavedasher, everyone is welcome to battle it out on Nintendo Switch. Our first-place champions will go home with a $50 Amazon gift card, second will snag $25 Amazon gift card and third will walk away with a $15 Amazon gift card." 
+            location = "Games Room, University Student Union"
+            start_date = "2023-04-03"
+            start_time =  "18:00"
+            end_date = "2023-04-03"
+            end_time = "21:00"
+            creator = "Jazzi"
+            datecreated = "3/30/2023"
+            event_link, event_id = GoogleCalendarEvents.AddToCalendar(event_name, description, location, start_date, start_time, end_date, end_time)
+        
+            sql = "INSERT INTO events_db(event_id, server_id, event_name, description, location, start_date, start_time, end_date, end_time, event_link, creator, datecreated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+            val = (event_id, server_id, event_name, description, location, start_date, start_time, end_date, end_time, event_link, creator, datecreated)
+            self.db.query_input(sql,val)
+
 
         except Exception as error:
             print(f"Error occurred while executing query: {error}")
             await interaction.response.send_message("Oops! Something went wrong while inserting faqs and events examples into the database", ephemeral=True)
+        
         else:
             await interaction.response.send_message("Success! FAQ and events examples have been inserted into the database", ephemeral=True)
 
+        
             
             
     @app_commands.command(name="insertresp", description="Fills the database with responses")
@@ -180,14 +199,10 @@ class ExampleDB(commands.GroupCog, name="test"):
         embed = Embed(title="Clear all responses", description="Success! All responses have been cleared from the database", color=Color.green())
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
- 
-            
-
-
-
         
 
 async def setup(client: commands.Bot) -> None:
     await client.add_cog(ExampleDB(client))
+
 
         
