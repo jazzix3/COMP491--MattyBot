@@ -10,7 +10,7 @@ service = build('calendar', 'v3', credentials=creds)
 
 class GoogleCalendarEvents():
 
-    def AddToCalendar(event_name, location, description, start_date, start_time, end_date, end_time):
+    async def AddToCalendar(event_name, location, description, start_date, start_time, end_date, end_time):
         event_name = event_name
         location = location
         description = description
@@ -42,5 +42,12 @@ class GoogleCalendarEvents():
         print('Event ID: %s' % (event_id))
 
         return (event_link, event_id)
+    
+    async def DeleteFromCalendar(event_id):
+        eventId = event_id
+        service.events().delete(calendarId='primary', eventId=f'{eventId}').execute()
+
+
+        
 
 

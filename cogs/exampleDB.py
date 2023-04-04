@@ -52,20 +52,20 @@ class ExampleDB(commands.GroupCog, name="test"):
                 "Who are the club officers?", 
                 "President: Ash\n Vice-President: Misty\n Secretary: May\n Treasurer: Brock\n Faculty Advisor: Professor Oak", 
                 "Jazzi", 
-                "3/1/2023")
+                "4/1/2023")
             self.db.query_input(faqsql,val)
 
 
             event_name = "FIFA 23 Tournament"
             description = "Kick it in the Games Room and compete against other Matadors in FIFA ‘23 tournaments this semester! These tournaments are a great way to have fun while also having the potential of scoring some awesome prizes!"
             location = "Games Room, University Student Union"
-            start_date = "2023-04-01"
+            start_date = "2023-05-01"
             start_time =  "17:00"
-            end_date = "2023-04-01"
+            end_date = "2023-05-01"
             end_time = "20:00"
             creator = "Jazzi"
-            datecreated = "3/30/2023"
-            event_link, event_id = GoogleCalendarEvents.AddToCalendar(event_name, description, location, start_date, start_time, end_date, end_time)
+            datecreated = "4/2/2023"
+            event_link, event_id = await GoogleCalendarEvents.AddToCalendar(event_name, description, location, start_date, start_time, end_date, end_time)
         
             sql = "INSERT INTO events_db(event_id, server_id, event_name, description, location, start_date, start_time, end_date, end_time, event_link, creator, datecreated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
             val = (event_id, server_id, event_name, description, location, start_date, start_time, end_date, end_time, event_link, creator, datecreated)
@@ -75,13 +75,13 @@ class ExampleDB(commands.GroupCog, name="test"):
             event_name = "MataGame Night"
             description = "The University Student Union invites you to kick off the semester right at Matador Nights! Whether you want to dance the night away to awesome tunes provided by DJs, spruce up your Instagram feed with awe-inspiring photo ops or enjoy an amazing spread of FREE food—your perfect night starts here."
             location = "Games Room, University Student Union"
-            start_date = "2023-04-02"
+            start_date = "2023-05-02"
             start_time =  "12:00"
-            end_date = "2023-04-02"
+            end_date = "2023-05-02"
             end_time = "15:00"
             creator = "Jazzi"
-            datecreated = "3/30/2023"
-            event_link, event_id = GoogleCalendarEvents.AddToCalendar(event_name, description, location, start_date, start_time, end_date, end_time)
+            datecreated = "4/3/2023"
+            event_link, event_id = await GoogleCalendarEvents.AddToCalendar(event_name, description, location, start_date, start_time, end_date, end_time)
         
             sql = "INSERT INTO events_db(event_id, server_id, event_name, description, location, start_date, start_time, end_date, end_time, event_link, creator, datecreated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
             val = (event_id, server_id, event_name, description, location, start_date, start_time, end_date, end_time, event_link, creator, datecreated)
@@ -97,7 +97,7 @@ class ExampleDB(commands.GroupCog, name="test"):
             end_time = "21:00"
             creator = "Jazzi"
             datecreated = "3/30/2023"
-            event_link, event_id = GoogleCalendarEvents.AddToCalendar(event_name, description, location, start_date, start_time, end_date, end_time)
+            event_link, event_id = await GoogleCalendarEvents.AddToCalendar(event_name, description, location, start_date, start_time, end_date, end_time)
         
             sql = "INSERT INTO events_db(event_id, server_id, event_name, description, location, start_date, start_time, end_date, end_time, event_link, creator, datecreated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
             val = (event_id, server_id, event_name, description, location, start_date, start_time, end_date, end_time, event_link, creator, datecreated)

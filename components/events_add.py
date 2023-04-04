@@ -144,7 +144,7 @@ class Buttons3(ui.View):
         datecreated = timestamp.strftime(f"%m/%d/%Y")
 
         try:  
-            event_link, event_id = GoogleCalendarEvents.AddToCalendar(self.event_name, self.location, self.description, self.start_date, self.start_time, self.end_date, self.end_time)
+            event_link, event_id = await GoogleCalendarEvents.AddToCalendar(self.event_name, self.location, self.description, self.start_date, self.start_time, self.end_date, self.end_time)
         
             sql = "INSERT INTO events_db(event_id, server_id, event_name, description, location, start_date, start_time, end_date, end_time, event_link, creator, datecreated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
             val = (event_id, server_id, self.event_name.value, self.description.value, self.location.value, self.start_date.value, self.start_time.value, self.end_date.value, self.end_time.value, event_link, creator, datecreated)

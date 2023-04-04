@@ -1,6 +1,7 @@
 import discord
 from discord import ui,  Interaction, Embed, SelectOption, Color
 from matty_db import Database
+from cal_functions import GoogleCalendarEvents
 
 
 class EventsDropdownMenu(ui.Select):
@@ -110,6 +111,8 @@ class DeleteEventButtons(ui.View):
         event_name = self.event_name
         self.db.query("DELETE FROM events_db WHERE event_id = ?", event_id)
         self.db.query("DELETE FROM responses_db WHERE event_id = ?", event_id)
+        await GoogleCalendarEvents.DeleteFromCalendar(event_id)
+
         embed = Embed(title="", description=f"`{event_name}` has been deleted!", color = discord.Color.green())
         for child in self.children: #disables all buttons when one is pressed
             child.disabled = True
