@@ -2,9 +2,11 @@ import discord
 from discord import app_commands, ui,  Interaction, Embed, SelectOption, Color
 from discord.ext import commands
 from matty_db import Database
-from components.events_invite_rsvp_or_viewresponses import EventInviteView
 from components.events_add import Modal1
+from components.events_edit import EventEditView
+from components.events_invite_rsvp_or_viewresponses import EventInviteView
 from components.events_view_or_delete import EventsView
+
 
 
 
@@ -87,6 +89,16 @@ class EventCommands(commands.Cog):
     @eventinvite.error
     async def eventerror(self, interaction:Interaction, error):
        await interaction.response.send_message(embed=AdminErrorEmbed(), ephemeral=True) 
+
+
+    @admin.command(name="modify", description = "Modify an event (Admins only)")
+    @app_commands.checks.has_role("MattyBotAdmin")
+    async def modify(self, interaction: discord.Interaction):
+        server_id = interaction.guild_id
+        await interaction.response.send_message(view=EventEditView(server_id), ephemeral=True)
+    @modify.error
+    async def modifyerror(self, interaction:Interaction, error):
+        await interaction.response.send_message(embed=AdminErrorEmbed(), ephemeral=True)
 
 
     @admin.command(name="viewresponses", description="View all RSVP responses for an event (Admins only)")
