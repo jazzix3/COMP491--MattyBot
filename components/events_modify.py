@@ -71,7 +71,6 @@ class EventModifyDropdownMenu2(ui.Select):
             await interaction.response.send_modal(DescriptionModal(event_id))
         if self.values[0] == "location":
             await interaction.response.send_modal(LocationModal(event_id))
-        
 
     
 
@@ -95,49 +94,8 @@ class EventNameModal(ui.Modal, title="Modify an Event"):
         embed3.add_field(name=" ", value=" ", inline=False)
         embed3.add_field(name="New Event Name:", value=self.new_event_name.value, inline=False)
 
-        view3 = EventNameButtons(self.event_id, self.new_event_name.value, interaction)
+        view3 = ModifyButtons(self.event_id, self.new_event_name.value, 'event_name', interaction)
         await interaction.response.edit_message(embed=embed3, view=view3)
-
-
-class EventNameButtons(ui.View):
-    def __init__(self, event_id, new_event_name, interaction, *, timeout=None):
-        super().__init__(timeout=timeout)
-        self.db = Database()
-        self.event_id = event_id
-        self.new_event_name = new_event_name
-        
-    @discord.ui.button(label="Yes, modify event", style=discord.ButtonStyle.green)
-    async def confirm(self, interaction: Interaction, button: ui.Button):
-        event_id = self.event_id
-        new_event_name = self.new_event_name
-        
-        try:
-            self.db.query("UPDATE events_db SET event_name = ? WHERE event_id = ?", new_event_name, event_id)
-            await GoogleCalendarEvents.ModifyEventCalendar(event_id, new_event_name, 'summary')
-
-            for child in self.children: 
-                child.disabled = True
-
-        except Exception as error:
-            print(f"Error occurred while executing query: {error}")
-            await interaction.response.send_message("Oops! Something went wrong while adding a new event.", ephemeral=True)
-        
-        else:
-            embed4 = Embed(title="Success! The event name has been modified.", description=f"", color = discord.Color.green())
-            embed4.add_field(name=" ", value=" ", inline=False)
-            embed4.add_field(name=" ", value=" ", inline=False)
-            embed4.add_field(name="", value=f"Would you like to modify another field for this event?")
-            view4=ModifyAnotherButtons(event_id)
-            
-            await interaction.response.edit_message(embed=embed4, view=view4)
-
-    @discord.ui.button(label="No, cancel", style=discord.ButtonStyle.red)
-    async def cancel(self, interaction: Interaction, button: ui.Button):
-        embed = Embed(title="", description=f"This modification was not saved because the action was cancelled", color = discord.Color.red())
-        for child in self.children:
-            child.disabled = True 
-        await interaction.response.edit_message(embed=embed, view=self)
-
 
 
 
@@ -161,49 +119,8 @@ class DescriptionModal(ui.Modal, title="Modify an Event"):
         embed3.add_field(name=" ", value=" ", inline=False)
         embed3.add_field(name="New Description:", value=self.new_description.value, inline=False)
 
-        view3 = DescriptionButtons(self.event_id, self.new_description.value, interaction)
+        view3 = ModifyButtons(self.event_id, self.new_description.value, 'description', interaction)
         await interaction.response.edit_message(embed=embed3, view=view3)
-
-
-class DescriptionButtons(ui.View):
-    def __init__(self, event_id, new_description, interaction, *, timeout=None):
-        super().__init__(timeout=timeout)
-        self.db = Database()
-        self.event_id = event_id
-        self.new_description = new_description
-        
-    @discord.ui.button(label="Yes, modify event", style=discord.ButtonStyle.green)
-    async def confirm(self, interaction: Interaction, button: ui.Button):
-        event_id = self.event_id
-        new_description = self.new_description
-        
-        try:
-            self.db.query("UPDATE events_db SET description = ? WHERE event_id = ?", new_description, event_id)
-            await GoogleCalendarEvents.ModifyEventCalendar(event_id, new_description, 'description')
-
-            for child in self.children: 
-                child.disabled = True
-
-        except Exception as error:
-            print(f"Error occurred while executing query: {error}")
-            await interaction.response.send_message("Oops! Something went wrong while adding a new event.", ephemeral=True)
-        
-        else:
-            embed4 = Embed(title="Success! The description has been modified.", description=f"", color = discord.Color.green())
-            embed4.add_field(name=" ", value=" ", inline=False)
-            embed4.add_field(name=" ", value=" ", inline=False)
-            embed4.add_field(name="", value=f"Would you like to modify another field for this event?")
-            view4=ModifyAnotherButtons(event_id)
-            
-            await interaction.response.edit_message(embed=embed4, view=view4)
-
-    @discord.ui.button(label="No, cancel", style=discord.ButtonStyle.red)
-    async def cancel(self, interaction: Interaction, button: ui.Button):
-        embed = Embed(title="", description=f"This modification was not saved because the action was cancelled", color = discord.Color.red())
-        for child in self.children:
-            child.disabled = True 
-        await interaction.response.edit_message(embed=embed, view=self)
-
 
 
 class LocationModal(ui.Modal, title="Modify an Event"):
@@ -226,25 +143,34 @@ class LocationModal(ui.Modal, title="Modify an Event"):
         embed3.add_field(name=" ", value=" ", inline=False)
         embed3.add_field(name="New Location:", value=self.new_location.value, inline=False)
 
-        view3 = LocationButtons(self.event_id, self.new_location.value, interaction)
+        view3 = ModifyButtons(self.event_id, self.new_location.value, 'location', interaction)
         await interaction.response.edit_message(embed=embed3, view=view3)
 
 
-class LocationButtons(ui.View):
-    def __init__(self, event_id, new_location, interaction, *, timeout=None):
+
+
+
+class ModifyButtons(ui.View):
+    def __init__(self, event_id, new_value, field, interaction, *, timeout=None):
         super().__init__(timeout=timeout)
         self.db = Database()
         self.event_id = event_id
-        self.new_location = new_location
+        self.new_value = new_value
+        self.field = field
         
     @discord.ui.button(label="Yes, modify event", style=discord.ButtonStyle.green)
     async def confirm(self, interaction: Interaction, button: ui.Button):
         event_id = self.event_id
-        new_location = self.new_location
+        new_value = self.new_value
+        field = self.field
         
         try:
-            self.db.query("UPDATE events_db SET location = ? WHERE event_id = ?", new_location, event_id)
-            await GoogleCalendarEvents.ModifyEventCalendar(event_id, new_location, 'location')
+            self.db.query(f"UPDATE events_db SET {field} = ? WHERE event_id = ?", new_value, event_id)
+
+            if field == "event_name":
+                await GoogleCalendarEvents.ModifyEventCalendar(event_id, new_value, 'summary')
+            else:
+                await GoogleCalendarEvents.ModifyEventCalendar(event_id, new_value, field)
 
             for child in self.children: 
                 child.disabled = True
@@ -254,10 +180,10 @@ class LocationButtons(ui.View):
             await interaction.response.send_message("Oops! Something went wrong while adding a new event.", ephemeral=True)
         
         else:
-            embed4 = Embed(title="Success! The location has been modified.", description=f"", color = discord.Color.green())
+            embed4 = Embed(title=f"Success! The event's `{field}` has been modified.", description=f"", color = discord.Color.green())
             embed4.add_field(name=" ", value=" ", inline=False)
             embed4.add_field(name=" ", value=" ", inline=False)
-            embed4.add_field(name="", value=f"Would you like to modify another field for this event?")
+            embed4.add_field(name="", value=f"✏️  Would you like to modify another field for this event?")
             view4=ModifyAnotherButtons(event_id)
             
             await interaction.response.edit_message(embed=embed4, view=view4)
@@ -268,17 +194,6 @@ class LocationButtons(ui.View):
         for child in self.children:
             child.disabled = True 
         await interaction.response.edit_message(embed=embed, view=self)
-
-
-
-
-
-
-
-
-
-
-
 
 
 
