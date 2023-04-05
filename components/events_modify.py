@@ -66,12 +66,12 @@ class EventModifyDropdownMenu2(ui.Select):
         event_id = self.event_id
         
         if self.values[0] == "event_name":
-            await interaction.response.send_modal(Modal2(event_id))
+            await interaction.response.send_modal(ModifyEventNameModal(event_id))
 
 
     
 
-class Modal2(ui.Modal, title="Modify an Event"):
+class ModifyEventNameModal(ui.Modal, title="Modify an Event"):
     def __init__(self, event_id, *, timeout=None):
         super().__init__(timeout=timeout)
         self.db = Database()
@@ -89,9 +89,9 @@ class Modal2(ui.Modal, title="Modify an Event"):
         embed3.add_field(name="Old Event Name:", value=old_event_name, inline=False)
         embed3.add_field(name=" ", value=" ", inline=False)
         embed3.add_field(name=" ", value=" ", inline=False)
-        embed3.add_field(name="✨ New Event Name:", value=self.new_event_name, inline=False)
+        embed3.add_field(name="New Event Name:", value=self.new_event_name.value, inline=False)
 
-        view3 = Buttons3(self.event_id, self.new_event_name, interaction)
+        view3 = Buttons3(self.event_id, self.new_event_name.value, interaction)
         await interaction.response.edit_message(embed=embed3, view=view3)
 
 
@@ -106,7 +106,7 @@ class Buttons3(ui.View):
         
     @discord.ui.button(label="Yes, modify event", style=discord.ButtonStyle.green)
     async def confirm(self, interaction: Interaction, button: ui.Button):
-        pass
+        self.db.query("UPDATE events_db SET event_name = ? WHERE event_id = ?", self.new_event_name, self.event_id)
 
         for child in self.children: 
             child.disabled = True
