@@ -48,6 +48,16 @@ class GoogleCalendarEvents():
         service.events().delete(calendarId='primary', eventId=f'{eventId}').execute()
 
 
+
+    async def ModifyEventCalendar(event_id, new_value, field):
+        eventId = event_id
+        
+        event = service.events().get(calendarId='primary', eventId=f'{eventId}').execute()
+        event[field] = new_value
+
+        service.events().update(calendarId='primary', eventId=event['id'], body=event).execute()
+
+
         
 
 

@@ -67,6 +67,8 @@ class EventModifyDropdownMenu2(ui.Select):
         
         if self.values[0] == "event_name":
             await interaction.response.send_modal(ModifyEventNameModal(event_id))
+        if self.value[0] == "description":
+            await interaction.response.send_modal(ModifyDescriptionModal(event_id))
 
 
     
@@ -91,35 +93,83 @@ class ModifyEventNameModal(ui.Modal, title="Modify an Event"):
         embed3.add_field(name=" ", value=" ", inline=False)
         embed3.add_field(name="New Event Name:", value=self.new_event_name.value, inline=False)
 
-        view3 = Buttons3(self.event_id, self.new_event_name.value, interaction)
+        view3 = EventNameButtons(self.event_id, self.new_event_name.value, interaction)
         await interaction.response.edit_message(embed=embed3, view=view3)
 
 
-class Buttons3(ui.View):
+class EventNameButtons(ui.View):
     def __init__(self, event_id, new_event_name, interaction, *, timeout=None):
         super().__init__(timeout=timeout)
         self.db = Database()
         self.event_id = event_id
         self.new_event_name = new_event_name
         
-
-        
     @discord.ui.button(label="Yes, modify event", style=discord.ButtonStyle.green)
     async def confirm(self, interaction: Interaction, button: ui.Button):
-        self.db.query("UPDATE events_db SET event_name = ? WHERE event_id = ?", self.new_event_name, self.event_id)
-
-        for child in self.children: 
-            child.disabled = True
-        await interaction.response.edit_message(view=self)
-
+        event_id = self.event_id
+        new_event_name = self.new_event_name
         
+        try:
+            self.db.query("UPDATE events_db SET event_name = ? WHERE event_id = ?", new_event_name, event_id)
+            await GoogleCalendarEvents.ModifyEventCalendar(event_id, new_event_name, 'summary')
+
+            for child in self.children: 
+                child.disabled = True
+
+        except Exception as error:
+            print(f"Error occurred while executing query: {error}")
+            await interaction.response.send_message("Oops! Something went wrong while adding a new event.", ephemeral=True)
+        
+        else:
+            embed4 = Embed(title="Success! The event name has been modified.", description=f"", color = discord.Color.green())
+            embed4.add_field(name=" ", value=" ", inline=False)
+            embed4.add_field(name=" ", value=" ", inline=False)
+            embed4.add_field(name="", value=f"Would you like to modify another field for event: `{self.new_event_name}`?")
+            view4=ModifyAnotherButtons(event_id)
+            
+            await interaction.response.edit_message(embed=embed4, view=view4)
+
 
     @discord.ui.button(label="No, cancel", style=discord.ButtonStyle.red)
     async def cancel(self, interaction: Interaction, button: ui.Button):
-        embed = Embed(title="", description=f"Event was not created because the action was cancelled.", color = discord.Color.red())
-        for child in self.children: #disables all buttons when one is pressed
+        embed = Embed(title="", description=f"This modification was not saved because the action was cancelled", color = discord.Color.red())
+        for child in self.children:
             child.disabled = True 
-        await interaction.response.edit_message(embed=embed, view=self) 
+        await interaction.response.edit_message(embed=embed, view=self)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class ModifyAnotherButtons(ui.View):
+    def __init__(self, event_id, *, timeout=None):
+        super().__init__(timeout=timeout)
+        self.db = Database()
+        self.event_id = event_id
+        
+    @discord.ui.button(label="Yes, modify another field", style=discord.ButtonStyle.green)
+    async def confirm(self, interaction: Interaction, button: ui.Button):
+        event_id = self.event_id
+        embed = EventModifyEmbed(event_id)
+        view=EventModifyView2(event_id)
+        await interaction.response.edit_message(embed=embed,view=view)
+
+    @discord.ui.button(label="No, I'm done", style=discord.ButtonStyle.red)
+    async def cancel(self, interaction: Interaction, button: ui.Button):
+        event_id = self.event_id
+        embed = EventUpdatedEmbed(event_id)
+        for child in self.children:
+            child.disabled = True 
+        await interaction.response.edit_message(embed=embed, view=self)
 
 
 
@@ -148,6 +198,33 @@ class EventModifyEmbed(Embed):
         end_time = selection[0][6]
 
         super().__init__(title=f"✏️ You are modifying the event: `{event_name}`", description=description, color=Color.blue())
+        self.add_field(name=" ", value=" ", inline=False)
+        self.add_field(name=" ", value=" ", inline=False)
+        self.add_field(name=" ", value=" ", inline=False)
+        self.add_field(name="⏰ Starts: ", value=f"{start_date} at {start_time}", inline = True)
+        self.add_field(name="⏰ Ends:", value=f"{end_date} at {end_time}", inline = True)
+        self.add_field(name=" ", value=" ", inline=False)
+        self.add_field(name=" ", value=" ", inline=False)
+        self.add_field(name="📍 Location", value=location, inline = True)
+
+
+class EventUpdatedEmbed(Embed):
+    def __init__(self, event_id):
+        super().__init__()
+        self.db = Database()
+        self.event_id = event_id
+        
+
+        selection = self.db.query_fetch("SELECT event_name, description, location, start_date, start_time, end_date, end_time FROM events_db WHERE event_id = ?", (self.event_id,))
+        event_name = selection[0][0]
+        description = selection[0][1]
+        location = selection[0][2]
+        start_date = selection[0][3]
+        start_time = selection[0][4]
+        end_date = selection[0][5]
+        end_time = selection[0][6]
+
+        super().__init__(title=f"✨ Here is the updated information for the event: `{event_name}`", description=description, color=Color.blue())
         self.add_field(name=" ", value=" ", inline=False)
         self.add_field(name=" ", value=" ", inline=False)
         self.add_field(name=" ", value=" ", inline=False)
