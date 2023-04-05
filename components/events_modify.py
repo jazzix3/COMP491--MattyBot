@@ -7,13 +7,13 @@ from cal_functions import GoogleCalendarEvents
 
 
 
-class EventEditView(ui.View):
+class EventModifyView(ui.View):
     def __init__(self, server_id, *, timeout = None):
          super().__init__(timeout=timeout)
-         self.add_item(EventEditDropdownMenu(server_id))
+         self.add_item(EventModifyDropdownMenu(server_id))
 
 
-class EventEditDropdownMenu(ui.Select):
+class EventModifyDropdownMenu(ui.Select):
     def __init__(self, server_id):
         self.db = Database()
 
@@ -35,75 +35,88 @@ class EventEditDropdownMenu(ui.Select):
             return
         
         else:
-            embed2 = EventEditEmbed(event_id)
-            view2=EventEditView2(event_id)
+            embed2 = EventModifyEmbed(event_id)
+            view2=EventModifyView2(event_id)
             await interaction.response.edit_message(embed=embed2,view=view2)
 
 
 
-class EventEditView2(ui.View):
+class EventModifyView2(ui.View):
     def __init__(self, event_id, *, timeout = None):
          super().__init__(timeout=timeout)
-         self.add_item(EventEditDropdownMenu2(event_id)) 
+         self.add_item(EventModifyDropdownMenu2(event_id)) 
 
 
-class EventEditDropdownMenu2(ui.Select):
+class EventModifyDropdownMenu2(ui.Select):
     def __init__(self, event_id):
         self.db = Database()
-        event_id = event_id
+        self.event_id = event_id
 
         options = [
             SelectOption(label="Event Name", value="event_name"), 
             SelectOption(label="Description", value="description"),
             SelectOption(label="Location", value="location"),
-            SelectOption(label="Start Date ", value="start_date"),
-            SelectOption(label="Start Time", value="start_time"),
-            SelectOption(label="End Date", value="end_date"),
-            SelectOption(label="End Time", value="end_time")]
+            SelectOption(label="Start Date or Time ", value="start"),
+            SelectOption(label="End Date or Time", value="end")]
 
         super().__init__(placeholder="Select a field to modify", options=options)
 
 
     async def callback(self, interaction: Interaction):
+        event_id = self.event_id
+        
         if self.values[0] == "event_name":
-            await interaction.response.send_modal(EventNameModal())
+            await interaction.response.send_modal(Modal2(event_id))
 
 
     
 
-class EventNameModal(ui.Modal, title="Modify an Event"):
-    event_name = ui.TextInput(label="Event Name", style=TextStyle.short, required=True)
-
-    
-    async def on_submit(self, interaction: Interaction):
-        embed = Embed(title="Is this correct?", description="", color=discord.Color.blue())
-        embed.add_field(name="Event Name", value=self.event_name, inline=False)
-
-        #view = Buttons1(self.event_name)
-
-        await interaction.response.send_message(embed=embed, ephemeral=True)
-
-
-
-
-
-class Buttons1(ui.View):
-    def __init__(self, event_name, interaction, *, timeout=None):
+class Modal2(ui.Modal, title="Modify an Event"):
+    def __init__(self, event_id, *, timeout=None):
         super().__init__(timeout=timeout)
         self.db = Database()
-        self.event_name = event_name
-        self.interaction = interaction
+        self.event_id = event_id
 
-    @discord.ui.button(label="Yes, save this modification", style=discord.ButtonStyle.green)
-    async def confirm(self, interaction: Interaction, button: ui.Button):
-        #event_name = self.event_name
-    
-        pass
-        #await interaction.response.send_modal(Modal2(event_name, description, location))
+    new_event_name = ui.TextInput(label="New event name:", style=TextStyle.short, required=True)
+
+    async def on_submit(self, interaction: Interaction):
+        selection = self.db.query_fetch("SELECT event_name FROM events_db WHERE event_id = ?", (self.event_id,))
+        old_event_name = selection[0][0]
+
+        embed3 = Embed(title="✏️ Would you like to save this modification?", description="", color=discord.Color.green())
+        embed3.add_field(name=" ", value=" ", inline=False)
+        embed3.add_field(name=" ", value=" ", inline=False)
+        embed3.add_field(name="Old Event Name:", value=old_event_name, inline=False)
+        embed3.add_field(name=" ", value=" ", inline=False)
+        embed3.add_field(name=" ", value=" ", inline=False)
+        embed3.add_field(name="✨ New Event Name:", value=self.new_event_name, inline=False)
+
+        view3 = Buttons3(self.event_id, self.new_event_name, interaction)
+        await interaction.response.edit_message(embed=embed3, view=view3)
+
+
+class Buttons3(ui.View):
+    def __init__(self, event_id, new_event_name, interaction, *, timeout=None):
+        super().__init__(timeout=timeout)
+        self.db = Database()
+        self.event_id = event_id
+        self.new_event_name = new_event_name
         
+
+        
+    @discord.ui.button(label="Yes, modify event", style=discord.ButtonStyle.green)
+    async def confirm(self, interaction: Interaction, button: ui.Button):
+        pass
+
+        for child in self.children: 
+            child.disabled = True
+        await interaction.response.edit_message(view=self)
+
+        
+
     @discord.ui.button(label="No, cancel", style=discord.ButtonStyle.red)
     async def cancel(self, interaction: Interaction, button: ui.Button):
-        embed = Embed(title="", description=f"Event was not modified because the action was cancelled.", color = discord.Color.red())
+        embed = Embed(title="", description=f"Event was not created because the action was cancelled.", color = discord.Color.red())
         for child in self.children: #disables all buttons when one is pressed
             child.disabled = True 
         await interaction.response.edit_message(embed=embed, view=self) 
@@ -116,7 +129,9 @@ class Buttons1(ui.View):
 
 
 
-class EventEditEmbed(Embed):
+
+
+class EventModifyEmbed(Embed):
     def __init__(self, event_id):
         super().__init__()
         self.db = Database()
@@ -141,4 +156,3 @@ class EventEditEmbed(Embed):
         self.add_field(name=" ", value=" ", inline=False)
         self.add_field(name=" ", value=" ", inline=False)
         self.add_field(name="📍 Location", value=location, inline = True)
-
