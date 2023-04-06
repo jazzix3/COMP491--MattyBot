@@ -1,6 +1,7 @@
 import discord
 from discord import ui,  Interaction, Embed, SelectOption, Color
 from matty_db import Database
+from cal_functions import GoogleCalendarEvents
 
 
 
@@ -83,6 +84,7 @@ class EventInviteButtons(ui.View):
             elif call == 'memberrsvp':
                 response_embed = Embed(title="✅  You are attending!", description=f"See you there, {username}! Thank you for responding to this event.", color = Color.blue())
                 response_embed.add_field(name=" ", value=" ", inline=False)
+                response_embed.add_field(name="Link to Google Calendar:", value=f"{event_link}", inline=False)
                 response_embed.add_field(name="Link to Google Calendar:", value=f"{event_link}", inline=False)
                 for child in self.children: #disables all buttons when one is pressed
                     child.disabled = True

@@ -43,9 +43,24 @@ class GoogleCalendarEvents():
 
         return (event_link, event_id)
     
+    
+    async def ClearCalendar():
+        service.calendars().clear(calendarId='primary').execute()
+
+    
     async def DeleteFromCalendar(event_id):
         eventId = event_id
         service.events().delete(calendarId='primary', eventId=f'{eventId}').execute()
+
+    
+    async def LinkCalendar():
+        calendar_list = service.calendarList().list().execute()
+        for calendar in calendar_list['items']:
+            if calendar.get('primary'):
+                primary_calendar_id = calendar['id']
+                break
+        calendar_link = f'https://calendar.google.com/calendar/u/0/embed?src={primary_calendar_id}&ctz=America/Los_Angeles'
+        return calendar_link
 
 
 

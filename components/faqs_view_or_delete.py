@@ -43,9 +43,9 @@ class FaqsDropdownMenu(ui.Select):
                 embed2.add_field(name=" ", value=" ", inline=False)
                 embed2.add_field(name=" ", value=" ", inline=False)
                 embed2.add_field(name=f"`{question}`", value=answer, inline=False)
-                embed2.add_field(name="", value=" ", inline=False)
-                embed2.add_field(name="", value=" ", inline=False)
-                embed2.set_footer(text="⚠️ This action cannot be undone")
+                embed2.add_field(name=" ", value=" ", inline=False)
+                embed2.add_field(name=" ", value=" ", inline=False)
+                embed2.add_field(name="⚠️ Warning: This action cannot be undone", value=" ", inline=False)
                 view = DeleteFaqsButtons(faq_id, question)
                 await interaction.response.edit_message(embed=embed2, view=view)
         else:
