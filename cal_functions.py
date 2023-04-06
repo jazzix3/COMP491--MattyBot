@@ -1,4 +1,4 @@
-
+from datetime import datetime
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
@@ -46,6 +46,27 @@ class GoogleCalendarEvents():
     async def DeleteFromCalendar(event_id):
         eventId = event_id
         service.events().delete(calendarId='primary', eventId=f'{eventId}').execute()
+
+
+
+    async def ModifyEventCalendar(event_id, new_value, field):
+        eventId = event_id
+        event = service.events().get(calendarId='primary', eventId=f'{eventId}').execute()
+        
+        event[field] = new_value
+        service.events().update(calendarId='primary', eventId=event['id'], body=event).execute()
+
+    
+    async def ModifyDateTimeCalendar(event_id, new_start_date, new_start_time, new_end_date, new_end_time):
+        eventId = event_id
+        event = service.events().get(calendarId='primary', eventId=f'{eventId}').execute()
+        
+        
+        event['start'] = {'dateTime': f'{new_start_date}T{new_start_time}:00-07:00', 'timeZone': 'America/Los_Angeles',}
+        event['end'] = {'dateTime': f'{new_end_date}T{new_end_time}:00-07:00','timeZone': 'America/Los_Angeles',}
+        service.events().update(calendarId='primary', eventId=event['id'], body=event).execute()
+
+
 
 
         
