@@ -174,7 +174,7 @@ class DateTimeModal(ui.Modal, title="Modify an Event"):
         embed3.add_field(name=" ", value=" ", inline=False)
         embed3.add_field(name=" ", value=" ", inline=False)
         embed3.add_field(name="New Start Date and Time:", value=f"{self.new_start_date.value} at {self.new_start_time.value}", inline=True)
-        embed3.add_field(name="New End Date and Time:", value=f"{self.new_start_date.value} at {self.new_start_time.value}", inline=True)
+        embed3.add_field(name="New End Date and Time:", value=f"{self.new_end_date.value} at {self.new_end_time.value}", inline=True)
 
 
         view3 = ModifyDateTimeButtons(self.event_id, self.new_start_date.value, self.new_start_time.value, self.new_end_date.value, self.new_end_time.value, interaction)
