@@ -62,7 +62,7 @@ class Modal2(ui.Modal, title="Add an Event (Page 2 of 2)"):
     start_date = ui.TextInput(label="Start Date in YYYY-MM-DD (e.g. 2023-05-19)", style=TextStyle.short, required=True, min_length=10, max_length=10, placeholder="YYYY-MM-DD")
     start_time = ui.TextInput(label="Start Time in HH:MM (e.g. 08:00 = 8:00 AM)", style=TextStyle.short, required=True, min_length=5, max_length=5, placeholder= "HH:MM")
     end_date = ui.TextInput(label="End Date in YYYY-MM-DD", style=TextStyle.short, required=True, min_length=10, max_length=10, placeholder= "YYYY-MM-DD")
-    end_time = ui.TextInput(label="End Time in HH:MM (e.g. 14:00 = 2:00 PM)", style=TextStyle.short, required=True, min_length=5, max_length=5, placeholder="HH:MM")
+    end_time = ui.TextInput(label="End Time in HH:MM (e.g. 16:00 = 4:00 PM)", style=TextStyle.short, required=True, min_length=5, max_length=5, placeholder="HH:MM")
 
     async def on_submit(self, interaction: Interaction):
         embed2 = Embed(title="Is this event information correct? (Page 2 of 2)", description="", color=discord.Color.green())

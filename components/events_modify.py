@@ -56,8 +56,7 @@ class EventModifyDropdownMenu2(ui.Select):
             SelectOption(label="Event Name", value="event_name"), 
             SelectOption(label="Description", value="description"),
             SelectOption(label="Location", value="location"),
-            SelectOption(label="Start Date or Time ", value="start"),
-            SelectOption(label="End Date or Time", value="end")]
+            SelectOption(label="Date and Time", value="dateTime")]
 
         super().__init__(placeholder="Select a field to modify", options=options)
 
@@ -67,10 +66,12 @@ class EventModifyDropdownMenu2(ui.Select):
         
         if self.values[0] == "event_name":
             await interaction.response.send_modal(EventNameModal(event_id))
-        if self.values[0] == "description":
+        elif self.values[0] == "description":
             await interaction.response.send_modal(DescriptionModal(event_id))
-        if self.values[0] == "location":
+        elif self.values[0] == "location":
             await interaction.response.send_modal(LocationModal(event_id))
+        elif self.values[0] == "dateTime":
+            await interaction.response.send_modal(DateTimeModal(event_id))
 
     
 
@@ -105,7 +106,7 @@ class DescriptionModal(ui.Modal, title="Modify an Event"):
         self.db = Database()
         self.event_id = event_id
 
-    new_description = ui.TextInput(label="New description:", style=TextStyle.short, required=True)
+    new_description = ui.TextInput(label="New description:", style=TextStyle.paragraph, required=True)
 
     async def on_submit(self, interaction: Interaction):
         selection = self.db.query_fetch("SELECT description FROM events_db WHERE event_id = ?", (self.event_id,))
@@ -147,6 +148,39 @@ class LocationModal(ui.Modal, title="Modify an Event"):
         await interaction.response.edit_message(embed=embed3, view=view3)
 
 
+class DateTimeModal(ui.Modal, title="Modify an Event"):
+    def __init__(self, event_id, *, timeout=None):
+        super().__init__(timeout=timeout)
+        self.db = Database()
+        self.event_id = event_id
+
+    new_start_date = ui.TextInput(label="New Start Date (e.g. 2023-05-19)", style=TextStyle.short, required=True, min_length=10, max_length=10, placeholder="YYYY-MM-DD")
+    new_start_time = ui.TextInput(label="New Start Time (e.g. 08:00 = 8:00 AM)", style=TextStyle.short, required=True, min_length=5, max_length=5, placeholder= "HH:MM")
+    new_end_date = ui.TextInput(label="New End Date (e.g. 2023-05-19)", style=TextStyle.short, required=True, min_length=10, max_length=10, placeholder="YYYY-MM-DD")
+    new_end_time = ui.TextInput(label="New End Time (e.g. 16:00 = 4:00 PM)", style=TextStyle.short, required=True, min_length=5, max_length=5, placeholder= "HH:MM")
+
+    async def on_submit(self, interaction: Interaction):
+        selection = self.db.query_fetch("SELECT start_date, start_time, end_date, end_time FROM events_db WHERE event_id = ?", (self.event_id,))
+        old_start_date = selection[0][0]
+        old_start_time = selection[0][1]
+        old_end_date = selection[0][2]
+        old_end_time = selection[0][3]
+
+        embed3 = Embed(title="✏️ Would you like to save this modification?", description="", color=discord.Color.green())
+        embed3.add_field(name=" ", value=" ", inline=False)
+        embed3.add_field(name=" ", value=" ", inline=False)
+        embed3.add_field(name="Old Start Date and Time:", value=f"{old_start_date} at {old_start_time}", inline=True)
+        embed3.add_field(name="Old End Date and Time:", value=f"{old_end_date} at {old_end_time}", inline=True)
+        embed3.add_field(name=" ", value=" ", inline=False)
+        embed3.add_field(name=" ", value=" ", inline=False)
+        embed3.add_field(name="New Start Date and Time:", value=f"{self.new_start_date.value} at {self.new_start_time.value}", inline=True)
+        embed3.add_field(name="New End Date and Time:", value=f"{self.new_start_date.value} at {self.new_start_time.value}", inline=True)
+
+
+        view3 = ModifyDateTimeButtons(self.event_id, self.new_start_date.value, self.new_start_time.value, self.new_end_date.value, self.new_end_time.value, interaction)
+        await interaction.response.edit_message(embed=embed3, view=view3)
+
+
 
 
 
@@ -181,6 +215,57 @@ class ModifyButtons(ui.View):
         
         else:
             embed4 = Embed(title=f"Success! The event's `{field}` has been modified.", description=f"", color = discord.Color.green())
+            embed4.add_field(name=" ", value=" ", inline=False)
+            embed4.add_field(name=" ", value=" ", inline=False)
+            embed4.add_field(name="", value=f"✏️  Would you like to modify another field for this event?")
+            view4=ModifyAnotherButtons(event_id)
+            
+            await interaction.response.edit_message(embed=embed4, view=view4)
+
+    @discord.ui.button(label="No, cancel", style=discord.ButtonStyle.red)
+    async def cancel(self, interaction: Interaction, button: ui.Button):
+        embed = Embed(title="", description=f"This modification was not saved because the action was cancelled", color = discord.Color.red())
+        for child in self.children:
+            child.disabled = True 
+        await interaction.response.edit_message(embed=embed, view=self)
+
+
+
+class ModifyDateTimeButtons(ui.View):
+    def __init__(self, event_id, new_start_date, new_start_time, new_end_date, new_end_time, interaction, *, timeout=None):
+        super().__init__(timeout=timeout)
+        self.db = Database()
+        self.event_id = event_id
+        self.new_start_date = new_start_date
+        self.new_start_time = new_start_time
+        self.new_end_date = new_end_date
+        self.new_end_time = new_end_time
+        
+    @discord.ui.button(label="Yes, modify event", style=discord.ButtonStyle.green)
+    async def confirm(self, interaction: Interaction, button: ui.Button):
+        event_id = self.event_id
+        new_start_date = self.new_start_date
+        new_start_time = self.new_start_time
+        new_end_date = self.new_end_date
+        new_end_time = self.new_end_time
+        
+        try:
+            self.db.query(f"UPDATE events_db SET start_date  = ? WHERE event_id = ?", new_start_date, event_id)
+            self.db.query(f"UPDATE events_db SET start_time  = ? WHERE event_id = ?", new_start_time, event_id)
+            self.db.query(f"UPDATE events_db SET end_date  = ? WHERE event_id = ?", new_end_date, event_id)
+            self.db.query(f"UPDATE events_db SET end_time  = ? WHERE event_id = ?", new_end_time, event_id)
+        
+            await GoogleCalendarEvents.ModifyDateTimeCalendar(event_id, new_start_date, new_start_time, new_end_date, new_end_time)
+
+            for child in self.children: 
+                child.disabled = True
+
+        except Exception as error:
+            print(f"Error occurred while executing query: {error}")
+            await interaction.response.send_message("Oops! Something went wrong while adding a new event.", ephemeral=True)
+        
+        else:
+            embed4 = Embed(title=f"Success! The event's `Date and Time` have been modified.", description=f"", color = discord.Color.green())
             embed4.add_field(name=" ", value=" ", inline=False)
             embed4.add_field(name=" ", value=" ", inline=False)
             embed4.add_field(name="", value=f"✏️  Would you like to modify another field for this event?")
