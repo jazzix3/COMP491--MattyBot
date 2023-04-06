@@ -52,6 +52,16 @@ class GoogleCalendarEvents():
         eventId = event_id
         service.events().delete(calendarId='primary', eventId=f'{eventId}').execute()
 
+    
+    async def LinkCalendar():
+        calendar_list = service.calendarList().list().execute()
+        for calendar in calendar_list['items']:
+            if calendar.get('primary'):
+                primary_calendar_id = calendar['id']
+                break
+        calendar_link = f'https://calendar.google.com/calendar/u/0?cid={primary_calendar_id}'
+        return calendar_link
+
 
 
     async def ModifyEventCalendar(event_id, new_value, field):

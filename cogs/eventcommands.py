@@ -1,5 +1,5 @@
 import discord
-from discord import app_commands, ui,  Interaction, Embed, SelectOption, Color
+from discord import app_commands, ui,  Interaction, Embed, Color
 from discord.ext import commands
 from matty_db import Database
 from components.events_add import Modal1
@@ -7,6 +7,7 @@ from components.events_clearall import ClearAllEmbed, ClearAllButtons
 from components.events_modify import EventModifyView
 from components.events_invite_rsvp_or_viewresponses import EventInviteView
 from components.events_view_or_delete import EventsView
+import cal_functions
 
 
 
@@ -24,6 +25,16 @@ class EventCommands(commands.Cog):
     async def events(self, interaction: Interaction):
         server_id = interaction.guild_id
         await interaction.response.send_message(view=EventsView(server_id, call='view'), ephemeral=True)
+
+    
+    @member.command(name="calendar", description="View the calendar of events")
+    async def calendar(self, interaction: Interaction):
+        calendar_link = await cal_functions.GoogleCalendarEvents.LinkCalendar()
+        embed = discord.Embed(title="To view the calendar, follow this link:", description=f"{calendar_link}", color=Color.blue())
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+    @calendar.error
+    async def calendar(self, interaction:Interaction, error):
+        await interaction.response.send_message(embed=AdminErrorEmbed(), ephemeral=True) 
 
 
     @member.command(name="list", description="View a list of all events")
