@@ -85,6 +85,7 @@ class EventInviteButtons(ui.View):
                 response_embed = Embed(title="✅  You are attending!", description=f"See you there, {username}! Thank you for responding to this event.", color = Color.blue())
                 response_embed.add_field(name=" ", value=" ", inline=False)
                 response_embed.add_field(name="Link to Google Calendar:", value=f"{event_link}", inline=False)
+                response_embed.add_field(name="Link to Google Calendar:", value=f"{event_link}", inline=False)
                 for child in self.children: #disables all buttons when one is pressed
                     child.disabled = True
                 await interaction.response.edit_message(embed=response_embed, view=self)               

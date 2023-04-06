@@ -59,7 +59,7 @@ class GoogleCalendarEvents():
             if calendar.get('primary'):
                 primary_calendar_id = calendar['id']
                 break
-        calendar_link = f'https://calendar.google.com/calendar/u/0?cid={primary_calendar_id}'
+        calendar_link = f'https://calendar.google.com/calendar/u/0/embed?src={primary_calendar_id}&ctz=America/Los_Angeles'
         return calendar_link
 
 
