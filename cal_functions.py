@@ -43,6 +43,11 @@ class GoogleCalendarEvents():
 
         return (event_link, event_id)
     
+    
+    async def ClearCalendar():
+        service.calendars().clear(calendarId='primary').execute()
+
+    
     async def DeleteFromCalendar(event_id):
         eventId = event_id
         service.events().delete(calendarId='primary', eventId=f'{eventId}').execute()

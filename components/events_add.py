@@ -88,7 +88,7 @@ class Buttons2(ui.View):
         self.end_time = end_time
         self.interaction = interaction
 
-    @discord.ui.button(label="Yes, continue", style=discord.ButtonStyle.green)
+    @discord.ui.button(label="Yes, add the event", style=discord.ButtonStyle.green)
     async def next(self, interaction: Interaction, button: ui.Button):
         event_name = self.event_name
         description = self.description
@@ -98,7 +98,7 @@ class Buttons2(ui.View):
         end_date = self.end_date
         end_time = self.end_time
         
-        embed3 = Embed(title=f"Confirm all event details are correct", description="", color=discord.Color.green())
+        embed3 = Embed(title=f"Are all the event details correct?", description="", color=discord.Color.green())
         embed3.add_field(name=" ", value=" ", inline=False)
         embed3.add_field(name=f"`{event_name}`", value=description, inline=False)
         embed3.add_field(name=" ", value=" ", inline=False)

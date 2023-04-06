@@ -1,6 +1,7 @@
 import discord
 from discord import ui,  Interaction, Embed, SelectOption, Color
 from matty_db import Database
+from cal_functions import GoogleCalendarEvents
 
 
 

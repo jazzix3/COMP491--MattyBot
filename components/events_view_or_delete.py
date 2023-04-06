@@ -81,8 +81,10 @@ class EventsDropdownMenu(ui.Select):
                 embed2.add_field(name=" ", value=" ", inline=False)
                 embed2.add_field(name=" ", value=" ", inline=False)
                 embed2.add_field(name="📍 Location", value=location, inline = True)
-                embed2.add_field(name="", value=" ", inline=False)
-                embed2.set_footer(text="⚠️ This action cannot be undone")
+                embed2.add_field(name=" ", value=" ", inline=False)
+                embed2.add_field(name=" ", value=" ", inline=False)
+                embed2.add_field(name="⚠️ Warning: This action cannot be undone", value=" ", inline=False)
+
                 view = DeleteEventButtons(event_id, event_name)
                 await interaction.response.edit_message(embed=embed2, view=view) 
                 

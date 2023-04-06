@@ -37,11 +37,13 @@ class AddFaqModal(ui.Modal, title="Add to FAQ"):
 
 class ClearAllEmbed(Embed):
     def __init__(self):
-        super().__init__(title="❗ Are you sure you want to CLEAR all FAQs? ❗", description="", color=Color.orange())
+        super().__init__(title="❗ Are you sure you want to `CLEAR all` FAQs? ❗", description="", color=Color.orange())
         self.add_field(name="", value=" ", inline=False)
-        self.add_field(name="", value="All questions and answers in the database will be deleted **forever**", inline=False)
         self.add_field(name="", value=" ", inline=False)
-        self.set_footer(text="⚠️ This action cannot be undone")
+        self.add_field(name="", value="This will delete all FAQs from the database and calendar **forever**", inline=False)
+        self.add_field(name="", value=" ", inline=False)
+        self.add_field(name="", value=" ", inline=False)
+        self.add_field(name="", value="⚠️ Warning: Action cannot be undone", inline=False)
 
 
 class ClearAllButtons(ui.View):
