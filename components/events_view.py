@@ -2,6 +2,7 @@ import discord
 from discord import ui,  Interaction, Embed, SelectOption, Color
 from matty_db import Database
 from components.events_delete import DeleteEventEmbed, DeleteEventButtons
+from components.events_archive import ArchiveEventEmbed, ArchiveEventButtons
 
 
 class EventsDropdownMenu(ui.Select):
@@ -19,7 +20,7 @@ class EventsDropdownMenu(ui.Select):
         elif call == 'delete': 
             super().__init__(placeholder="Select an event to delete", options=options)
         elif call == 'archive': 
-            super().__init__(placeholder="Select an event to move to archive", options=options)
+            super().__init__(placeholder="Select an event to move to the archive", options=options)
     
     async def callback(self, interaction: Interaction):
         event_id = self.values[0]
@@ -78,7 +79,9 @@ class EventsDropdownMenu(ui.Select):
                 await interaction.response.edit_message(embed=embed, view=view)
 
             elif self.call =='archive':
-                await interaction.response.send_message(content="yes!")  
+                embed = ArchiveEventEmbed(event_name, description, location, start_date, start_time, end_date, end_time)
+                view = ArchiveEventButtons(event_id, event_name)
+                await interaction.response.edit_message(embed=embed, view=view)
                 
         else:
             embed = Embed(title="", description=f"Oops! Something went wrong. Try again or contact support.", color = discord.Color.red())

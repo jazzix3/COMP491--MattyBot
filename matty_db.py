@@ -38,6 +38,7 @@ class Database():
             username TEXT NOT NULL,
             response TEXT NOT NULL,
             FOREIGN KEY(event_id) REFERENCES events_db(event_id)
+            FOREIGN KEY(event_id) REFERENCES archive_db(event_id)
             )
             '''
         create_archive_table = '''
