@@ -8,7 +8,7 @@ from cal_functions import GoogleCalendarEvents
 
 class ClearAllEmbed(Embed):
     def __init__(self):
-        super().__init__(title="❗ Are you sure you want to `CLEAR all` events? ❗", description="", color=Color.blue())
+        
         self.add_field(name="", value=" ", inline=False)
         self.add_field(name="", value=" ", inline=False)
         self.add_field(name="", value="This will delete all events from the database and calendar **forever**", inline=False)
