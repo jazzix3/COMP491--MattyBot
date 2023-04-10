@@ -30,7 +30,7 @@ class EventCommands(commands.Cog):
     @member.command(name="calendar", description="View the calendar of events")
     async def calendar(self, interaction: Interaction):
         calendar_link = await cal_functions.GoogleCalendarEvents.LinkCalendar()
-        embed = discord.Embed(title="📅 To view the calendar of events, follow this link:", description=f"{calendar_link}", color=Color.blue())
+        embed = discord.Embed(title="📅  To view the calendar of events, follow this link:", description=f"{calendar_link}", color=Color.blue())
         await interaction.response.send_message(embed=embed, ephemeral=True)
     @calendar.error
     async def calendar(self, interaction:Interaction, error):

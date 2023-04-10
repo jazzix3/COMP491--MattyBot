@@ -28,7 +28,7 @@ class Client(commands.Bot):
         print(prfx + Style.NORMAL +" Logged in as "  + Fore.YELLOW + self.user.name)
         print(prfx + Style.NORMAL + " Bot ID "  + Fore.YELLOW + str(self.user.id))
         synced = await self.tree.sync()
-        print(prfx + Style.NORMAL + " Number of cogs loaded: "  + Fore.YELLOW + str(len(self.coglist)))
+        print(prfx + Style.NORMAL + " Number of cogs loaded: "  + Fore.YELLOW + str(len(self.coglist)) + Fore.WHITE)
         #print(prfx + " Number of slash commands synced: " + Fore.YELLOW + str(len(synced)))
         CalendarSetup()
         print(prfx + Style.NORMAL + " Logged into Google Calendar id: "  + Fore.YELLOW + "***(will add id later)***")
