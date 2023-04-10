@@ -2,8 +2,9 @@ import discord
 from discord import app_commands, ui,  Interaction, Embed, SelectOption, Color
 from discord.ext import commands
 from matty_db import Database
-from components.faqs_view_or_delete import FaqsView
-from components.faqs_add_or_clearall import AddFaqModal, ClearAllEmbed, ClearAllButtons
+from components.faqs_view import FaqsView
+from components.faqs_add import AddFaqModal
+from components.faqs_clearall import ClearAllButtons, ClearAllEmbed
 
 
 

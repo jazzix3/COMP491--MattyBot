@@ -39,7 +39,7 @@ class EventInviteDropdownMenu(ui.Select):
             elif call == 'memberrsvp': 
                 embed = EventInviteEmbed(event_id)
                 view = EventInviteButtons(event_id, call)
-                await interaction.response.edit_message(embed=embed, view=view, delete_after=30)
+                await interaction.response.edit_message(embed=embed, view=view)
             elif call == 'responses':
                 embed = EventResponsesEmbed(event_id)
                 await interaction.response.edit_message(embed=embed)
@@ -76,19 +76,20 @@ class EventInviteButtons(ui.View):
                 new_embed = EventInviteEmbed(event_id)
                 new_view = EventInviteButtons(event_id, call)           
                 await interaction.response.edit_message(embed=new_embed, view=new_view)
-                response_embed = Embed(title="✅  You are attending!", description=f"See you there, {username}! Thank you for responding to this event.", color = Color.blue())
-                response_embed.add_field(name=" ", value=" ", inline=False)
-                response_embed.add_field(name="Link to Google Calendar:", value=f"{event_link}", inline=False)
-                await interaction.followup.send(embed=response_embed, ephemeral=True)
+                embed = Embed(title="✅  You are attending!", description=f"See you there, {username}! Thank you for responding to this event.", color = Color.blue())
+                embed.add_field(name=" ", value=" ", inline=False)
+                embed.add_field(name="📅  Link to Google Calendar:", value=f"{event_link}", inline=False)
+
+                
+                await interaction.followup.send(embed=embed, ephemeral=True)
 
             elif call == 'memberrsvp':
-                response_embed = Embed(title="✅  You are attending!", description=f"See you there, {username}! Thank you for responding to this event.", color = Color.blue())
-                response_embed.add_field(name=" ", value=" ", inline=False)
-                response_embed.add_field(name="Link to Google Calendar:", value=f"{event_link}", inline=False)
-                response_embed.add_field(name="Link to Google Calendar:", value=f"{event_link}", inline=False)
-                for child in self.children: #disables all buttons when one is pressed
+                embed2 = Embed(title="✅  You are attending!", description=f"See you there, {username}! Thank you for responding to this event.", color = Color.blue())
+                embed2.add_field(name=" ", value=" ", inline=False)
+                embed2.add_field(name="📅 Link to Google Calendar: ", value=f"{event_link}", inline=False)
+                for child in self.children: 
                     child.disabled = True
-                await interaction.response.edit_message(embed=response_embed, view=self)               
+                await interaction.response.edit_message(embed=embed2, view=self)               
         else:
             embed = Embed(title="", description=f"Oops! Something went wrong. Try again or contact support.", color = discord.Color.red())
             await interaction.response.send_message(embed=embed, ephemeral=True)
@@ -109,7 +110,7 @@ class EventInviteButtons(ui.View):
                 await interaction.followup.send(embed=response_embed, ephemeral=True)
             elif call == 'memberrsvp':
                 response_embed = Embed(title="❌  Sorry you can't go!", description=f"Hope to see you next time, {username}! Thank you for responding to this event.", color = Color.blue())
-                for child in self.children: #disables all buttons when one is pressed
+                for child in self.children: 
                     child.disabled = True
                 await interaction.response.edit_message(embed=response_embed, view=self)               
         
@@ -130,14 +131,13 @@ class EventInviteButtons(ui.View):
                 await interaction.followup.send(embed=response_embed, ephemeral=True)
             elif call == 'memberrsvp':
                 response_embed = Embed(title="❔  We marked you as 'maybe', and we hope you can make it!", description="Update your RSVP anytime using command **/event- RSVP**. Thank you for responding to this event.", color = Color.blue())
-                for child in self.children: #disables all buttons when one is pressed
+                for child in self.children: 
                     child.disabled = True
                 await interaction.response.edit_message(embed=response_embed, view=self)
         
 
 
     async def update_response(self, username, response):
-        # Check if the event_id exists in the events_db table (to make sure foreign keys match)
         event_check = self.db.query_fetch("SELECT event_id FROM events_db WHERE event_id = ?", (self.event_id,))
         if not event_check:
             return False

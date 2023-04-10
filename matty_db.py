@@ -40,9 +40,27 @@ class Database():
             FOREIGN KEY(event_id) REFERENCES events_db(event_id)
             )
             '''
+        create_archive_table = '''
+            CREATE TABLE IF NOT EXISTS archive_db(
+            event_id TEXT PRIMARY KEY,
+            server_id INTEGER,
+            event_name TEXT,
+            description TEXT,
+            location TEXT,
+            start_date TEXT,
+            start_time TEXT,
+            end_date TEXT,
+            end_time TEXT,
+            event_link TEXT,
+            creator TEXT,
+            datecreated TEXT
+            )
+            '''
+
         self.query(create_faqs_table)
         self.query(create_events_table)
         self.query(create_responses_table)
+        self.query(create_archive_table)
         
     def query(self, query, *params):
         db = sqlite3.connect(self.filename)
