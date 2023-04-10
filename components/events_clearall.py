@@ -8,7 +8,7 @@ from cal_functions import GoogleCalendarEvents
 
 class ClearAllEmbed(Embed):
     def __init__(self):
-        
+        super().__init__(title="❗ Are you sure you want to `CLEAR all` events? ❗", description="", color=Color.orange())
         self.add_field(name="", value=" ", inline=False)
         self.add_field(name="", value=" ", inline=False)
         self.add_field(name="", value="This will delete all events from the database and calendar **forever**", inline=False)
@@ -32,14 +32,14 @@ class ClearAllButtons(ui.View):
             print(f"Error occurred while executing query: {error}")
             await interaction.response.send_message("Oops! Something went wrong while clearing all events.", ephemeral=True)
         else:
-            embed = Embed(title=" ", description="Success! All events have been cleared from the database", color=Color.green())
-            for child in self.children: #disables all buttons when one is pressed
+            embed = Embed(title=" ", description="Success! All events have been cleared from the database and calendar", color=Color.green())
+            for child in self.children:
                 child.disabled = True
             await interaction.response.edit_message(embed=embed, view=self)
 
     @discord.ui.button(label="No, cancel", style=discord.ButtonStyle.red)
     async def cancel(self, interaction: Interaction, button: ui.Button):
         embed = Embed(title="", description=f"events were **NOT** cleared because the action was cancelled.", color = discord.Color.red())
-        for child in self.children: #disables all buttons when one is pressed
+        for child in self.children: 
             child.disabled = True 
         await interaction.response.edit_message(embed=embed, view=self)

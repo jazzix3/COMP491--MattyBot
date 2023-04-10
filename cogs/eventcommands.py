@@ -70,6 +70,15 @@ class EventCommands(commands.Cog):
     @add.error
     async def adderror(self, interaction:Interaction, error):
         await interaction.response.send_message(embed=AdminErrorEmbed(), ephemeral=True)
+    
+    @admin.command(name="archive", description="Move a past event the archive (Admins only)")
+    @app_commands.checks.has_role("MattyBotAdmin")
+    async def archive(self, interaction: Interaction):
+        server_id = interaction.guild_id
+        await interaction.response.send_message(view=EventsView(server_id, call='archive'), ephemeral=True)
+    @archive.error
+    async def archiveerror(self, interaction:Interaction, error):
+        await interaction.response.send_message(embed=AdminErrorEmbed(), ephemeral=True)
 
 
     @admin.command(name="clearall", description="Clear all events from the database (Admins only)")

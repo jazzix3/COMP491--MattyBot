@@ -1,7 +1,6 @@
 import discord
 from discord import ui,  Interaction, Embed, SelectOption, Color
 from matty_db import Database
-from cal_functions import GoogleCalendarEvents
 from components.events_delete import DeleteEventEmbed, DeleteEventButtons
 
 
@@ -17,8 +16,10 @@ class EventsDropdownMenu(ui.Select):
 
         if call == 'view':
             super().__init__(placeholder="Select an event to view the event details", options=options)
-        else: 
+        elif call == 'delete': 
             super().__init__(placeholder="Select an event to delete", options=options)
+        elif call == 'archive': 
+            super().__init__(placeholder="Select an event to move to archive", options=options)
     
     async def callback(self, interaction: Interaction):
         event_id = self.values[0]
@@ -74,7 +75,10 @@ class EventsDropdownMenu(ui.Select):
             elif self.call =='delete':
                 embed = DeleteEventEmbed(event_name, description, location, start_date, start_time, end_date, end_time)
                 view = DeleteEventButtons(event_id, event_name)
-                await interaction.response.edit_message(embed=embed, view=view) 
+                await interaction.response.edit_message(embed=embed, view=view)
+
+            elif self.call =='archive':
+                await interaction.response.send_message(content="yes!")  
                 
         else:
             embed = Embed(title="", description=f"Oops! Something went wrong. Try again or contact support.", color = discord.Color.red())
