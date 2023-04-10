@@ -6,7 +6,7 @@ from components.events_add import Modal1
 from components.events_clearall import ClearAllEmbed, ClearAllButtons
 from components.events_modify import EventModifyView
 from components.events_invite_rsvp_or_viewresponses import EventInviteView
-from components.events_view_or_delete import EventsView
+from components.events_view import EventsView
 import cal_functions
 
 
@@ -30,7 +30,7 @@ class EventCommands(commands.Cog):
     @member.command(name="calendar", description="View the calendar of events")
     async def calendar(self, interaction: Interaction):
         calendar_link = await cal_functions.GoogleCalendarEvents.LinkCalendar()
-        embed = discord.Embed(title="To view the calendar, follow this link:", description=f"{calendar_link}", color=Color.blue())
+        embed = discord.Embed(title="📅 To view the calendar of events, follow this link:", description=f"{calendar_link}", color=Color.blue())
         await interaction.response.send_message(embed=embed, ephemeral=True)
     @calendar.error
     async def calendar(self, interaction:Interaction, error):
