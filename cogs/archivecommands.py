@@ -24,7 +24,6 @@ class ArchiveCommands(commands.Cog):
     async def restore(self, interaction: Interaction):
         server_id = interaction.guild_id
         await interaction.response.send_message(view=ArchiveView(server_id, call='restore'), ephemeral=True)
-
     @restore.error
     async def restore(self, interaction:Interaction, error):
         await interaction.response.send_message(embed=AdminErrorEmbed(), ephemeral=True)

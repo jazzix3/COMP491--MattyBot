@@ -6,7 +6,7 @@ from matty_db import Database
 
 class RestoreEventEmbed(Embed):
     def __init__(self, event_name, description, location, start_date, start_time, end_date, end_time):
-        super().__init__(title="❗ Are you sure you want to `RESTORE` this event from the archive? ❗", description="", color=Color.dark_blue())
+        super().__init__(title="❗ Are you sure you want to `RESTORE` this event from the archive? ❗", description="", color=Color.dark_blue)
         self.add_field(name=" ", value=" ", inline=False)
         self.add_field(name=f"📅  `{event_name}`", value=description)
         self.add_field(name=" ", value=" ", inline=False)
@@ -18,7 +18,7 @@ class RestoreEventEmbed(Embed):
         self.add_field(name="📍 Location", value=location, inline = True)
         self.add_field(name=" ", value=" ", inline=False)
         self.add_field(name=" ", value=" ", inline=False)
-        self.add_field(name="This action will move this event from the archive to events. Events can be viewed using command **/events**", value=" ", inline=False)
+        self.add_field(name="This action will remove the event from the archive. Events can be viewed using command **/events**", value=" ", inline=False)
 
 
 class RestoreEventButtons(ui.View):
@@ -29,7 +29,7 @@ class RestoreEventButtons(ui.View):
         self.event_name = event_name
         
 
-    @discord.ui.button(label="Yes, move it", style=discord.ButtonStyle.green)
+    @discord.ui.button(label="Yes, remove it", style=discord.ButtonStyle.green)
     async def confirm(self, interaction: Interaction, button: ui.Button):
         event_id = self.event_id
         event_name = self.event_name
