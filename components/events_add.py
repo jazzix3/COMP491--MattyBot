@@ -19,9 +19,9 @@ class Modal1(ui.Modal, title="Add an Event (Page 1 of 2)"):
     
     async def on_submit(self, interaction: Interaction):
         embed = Embed(title="Is this event information is correct? (Page 1 of 2)", description="", color=discord.Color.green())
-        embed.add_field(name="Event Name", value=self.event_name, inline=False)
+        embed.add_field(name="`Event Name`", value=self.event_name, inline=False)
         embed.add_field(name="Description", value=self.description, inline=False)
-        embed.add_field(name="Location", value=self.location, inline=False)
+        embed.add_field(name="📍 Location", value=self.location, inline=False)
         
         view = Buttons1(self.event_name, self.description, self.location, interaction)
         await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
@@ -67,10 +67,10 @@ class Modal2(ui.Modal, title="Add an Event (Page 2 of 2)"):
     async def on_submit(self, interaction: Interaction):
         embed2 = Embed(title="Is this event information correct? (Page 2 of 2)", description="", color=discord.Color.green())
         
-        embed2.add_field(name="Start date", value=self.start_date, inline=False)
-        embed2.add_field(name="Start time", value=self.start_time, inline=False)
-        embed2.add_field(name="End date", value=self.end_date, inline=False)
-        embed2.add_field(name="End time", value=self.end_time, inline=False)
+        embed2.add_field(name="📅 Start date", value=self.start_date, inline=False)
+        embed2.add_field(name="⏰ Start time", value=self.start_time, inline=False)
+        embed2.add_field(name="📅 End date", value=self.end_date, inline=False)
+        embed2.add_field(name="⏰ End time", value=self.end_time, inline=False)
         view2 = Buttons2(self.event_name, self.description, self.location, self.start_date, self.start_time, self.end_date, self.end_time, interaction)
         await interaction.response.edit_message(embed=embed2, view=view2)
 
@@ -88,7 +88,7 @@ class Buttons2(ui.View):
         self.end_time = end_time
         self.interaction = interaction
 
-    @discord.ui.button(label="Yes, add the event", style=discord.ButtonStyle.green)
+    @discord.ui.button(label="Yes, continue", style=discord.ButtonStyle.green)
     async def next(self, interaction: Interaction, button: ui.Button):
         event_name = self.event_name
         description = self.description

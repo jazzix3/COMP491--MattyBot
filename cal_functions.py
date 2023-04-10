@@ -10,7 +10,7 @@ service = build('calendar', 'v3', credentials=creds)
 
 class GoogleCalendarEvents():
 
-    async def AddToCalendar(event_name, location, description, start_date, start_time, end_date, end_time):
+    async def AddToCalendar(event_name, description, location, start_date, start_time, end_date, end_time):
         event_name = event_name
         location = location
         description = description
