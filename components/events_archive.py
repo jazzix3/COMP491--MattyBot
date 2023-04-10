@@ -1,5 +1,5 @@
 import discord
-from discord import ui,  Interaction, Embed, SelectOption, Color
+from discord import ui,  Interaction, Embed, Color
 from matty_db import Database
 
 

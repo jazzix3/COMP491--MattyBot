@@ -9,7 +9,7 @@ class EventInviteDropdownMenu(ui.Select):
     def __init__(self, server_id, call):
         self.db = Database()
         self.call = call
-        rows = self.db.query_fetch("SELECT event_name, event_id FROM events_db WHERE server_id = ?", (server_id,))
+        rows = self.db.query_fetch("SELECT event_name, event_id FROM events_db WHERE server_id = ? ORDER BY start_date ASC", (server_id,))
         if rows:
             options = [SelectOption(label=row[0], value=row[1]) for row in rows]
         else:
@@ -142,15 +142,12 @@ class EventInviteButtons(ui.View):
         if not event_check:
             return False
         
-        # Check if the user has already responded for this event
         response_check = self.db.query_fetch("SELECT response_id FROM responses_db WHERE event_id = ? AND username = ?", (self.event_id, username))
         if response_check:
-            # User has already responded, update the response
             sql = "UPDATE responses_db SET response = ? WHERE event_id = ? AND username = ?"
             val = (response, self.event_id, username)
             self.db.query_input(sql, val)
         else:
-            # User has not responded yet, insert the response
             sql = "INSERT INTO responses_db (event_id, username, response) VALUES (?, ?, ?)"
             val = (self.event_id, username, response)
             self.db.query_input(sql, val)

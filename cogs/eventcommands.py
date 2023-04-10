@@ -71,7 +71,7 @@ class EventCommands(commands.Cog):
     async def adderror(self, interaction:Interaction, error):
         await interaction.response.send_message(embed=AdminErrorEmbed(), ephemeral=True)
     
-    @admin.command(name="archive", description="Move a past even to the archive (Admins only)")
+    @admin.command(name="archive", description="Move a past event to the archive (Admins only)")
     @app_commands.checks.has_role("MattyBotAdmin")
     async def archive(self, interaction: Interaction):
         server_id = interaction.guild_id

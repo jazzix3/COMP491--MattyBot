@@ -10,7 +10,7 @@ class ArchiveCommands(commands.Cog):
         self.client = client
         self.db = Database()
     
-    member = app_commands.Group(name="archive-", description="Archive")    
+    #member = app_commands.Group(name="archive-", description="Archive")    
     admin = app_commands.Group(name="archive--", description="Archive")
 
 
@@ -19,12 +19,14 @@ class ArchiveCommands(commands.Cog):
         server_id = interaction.guild_id
         await interaction.response.send_message(view=ArchiveView(server_id, call='view'), ephemeral=True)
 
-    @admin.command(name="remove", description="Remove an event from the archive (Admins only)")
+    @admin.command(name="restore", description="Restore an event from the archive (Admins only)")
     @app_commands.checks.has_role("MattyBotAdmin")
-    async def remove(self, interaction: Interaction):
-        await interaction.response.send_modal(Modal1())
-    @remove.error
-    async def remove(self, interaction:Interaction, error):
+    async def restore(self, interaction: Interaction):
+        server_id = interaction.guild_id
+        await interaction.response.send_message(view=ArchiveView(server_id, call='restore'), ephemeral=True)
+
+    @restore.error
+    async def restore(self, interaction:Interaction, error):
         await interaction.response.send_message(embed=AdminErrorEmbed(), ephemeral=True)
 
 

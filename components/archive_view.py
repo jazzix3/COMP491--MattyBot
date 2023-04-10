@@ -1,13 +1,14 @@
 import discord
 from discord import ui,  Interaction, Embed, SelectOption, Color
 from matty_db import Database
+from components.archive_restore import RestoreEventEmbed, RestoreEventButtons
 
 
 class ArchiveDropdownMenu(ui.Select):
     def __init__(self, server_id, call):
         self.db = Database()
         self.call = call
-        rows = self.db.query_fetch("SELECT event_name, event_id FROM archive_db WHERE server_id = ?", (server_id,))
+        rows = self.db.query_fetch("SELECT event_name, event_id FROM archive_db WHERE server_id = ? ORDER BY start_date ASC", (server_id,))
         if rows:
             options = [SelectOption(label=row[0], value=row[1]) for row in rows]
         else:
@@ -15,8 +16,8 @@ class ArchiveDropdownMenu(ui.Select):
 
         if call == 'view':
             super().__init__(placeholder="Select an event to view the event details", options=options)
-        elif call == 'remove': 
-            super().__init__(placeholder="Select an event to remove from the archive", options=options)
+        elif call == 'restore': 
+            super().__init__(placeholder="Select an event to restore from the archive", options=options)
 
     
     async def callback(self, interaction: Interaction):
@@ -42,7 +43,7 @@ class ArchiveDropdownMenu(ui.Select):
 
 
             if self.call == 'view':
-                embed = Embed(title=f"📁  `{event_name}` (Archived)", description=description, color = discord.Color.blue())
+                embed = Embed(title=f"📁  `{event_name}` (Archived)", description=description, color = discord.Color.dark_blue())
                 embed.add_field(name=" ", value=" ", inline=False)
                 embed.add_field(name=" ", value=" ", inline=False)
                 embed.add_field(name=" ", value=" ", inline=False)
@@ -58,9 +59,9 @@ class ArchiveDropdownMenu(ui.Select):
                 embed.set_footer(text=f"Created by {creator} on {datecreated}")
                 await interaction.response.edit_message(embed=embed)
 
-            elif self.call =='remove':
-                embed = DeleteEventEmbed(event_name, description, location, start_date, start_time, end_date, end_time)
-                view = DeleteEventButtons(event_id, event_name)
+            elif self.call =='restore':
+                embed = RestoreEventEmbed(event_name, description, location, start_date, start_time, end_date, end_time)
+                view = RestoreEventButtons(event_id, event_name)
                 await interaction.response.edit_message(embed=embed, view=view)
 
                 
