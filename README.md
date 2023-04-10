@@ -58,16 +58,27 @@ DISCORD_BOT_TOKEN=yourbottokengoeshere
 
 
 ### Event Commands:
-`/events` - Displays a dropdown menu of events stored in the database. When a user selects an event from the menu, the event details from the database is populated in an embed. The message includes the event name, date, time, location, description, and creator, and has additional fields for users to indicate if they are attending, not attending, or unsure about the event.
+`/events` - Displays a dropdown menu of events stored in the events database. When a user selects an event from the menu, the event details from the database is populated in an embed. The message includes the event name, description, location, start date & time, end date& time, creator, and date created. In addition, it displays the number of users who are attending, not attending, or are unsure.
+
+`/events- calendar` - Generates an embed with a link to a public Google Calendar with all events.
 
 `/events- list` - Retrieves a list of all events from the database and creates an embed that displays the names, dates, and times of all events. If there are no events in the database, it sends a message stating that there are none.
 
-`/events- RSVP` - Displays a dropdown menu of event names stored in the database. When a user selects an event from the menu, an invitation for a selected event is created and an embed is sent to the channel. Buttons are displayed so members can indicate whether they are "attending", "can't go", or "maybe". When a button is clicked, it updates the responses database with the member's RSVP and updates the original embed to display the number of attendees. This message is ephemeral, so only the member who called it can RSVP.
+`/events- rsvp` - Displays a dropdown menu of eventsstored in the database. When a user selects an event from the menu, an invitation for a selected event is created and an embed is sent to the channel. Buttons are displayed so members can indicate whether they are "attending", "can't go", or "maybe". When a button is clicked, it updates the responses database with the member's RSVP and updates the original embed to display the number of attendees. This message is ephemeral, so only the member who called it can RSVP.
 
 `/events-- add` - (Admins only) Opens a modal (form) to prompt the user to input details about the event.  When the user submits the form, it adds the new event to a database and sends a message confirming that the event has been added. The message includes information about the event, such as the event name, date, time, location, and description, as well as the name of the user who created the event and the date it was created.
 
+`/events-- archive` - (Admins only) Displays a dropdown menu of eventsstored in the database. When a user selects an event from the menu, the corresponding event is moved from the events database to the archive database.
+
 `/events-- clearall` - (Admins only) Clears all FAQ from the database and sends a success message in an embed.
 
-`/events-- delete` - (Admins only) Displays a dropdown menu of event names stored in the database. When a user selects an event from the menu, the corresponding event is deleted from the events database as well as the responses from the responses database.
+`/events-- delete` - (Admins only) Displays a dropdown menu of events stored in the database. When a user selects an event from the menu, the corresponding event is deleted from the events database as well as the responses from the responses database.
 
-`/events-- invite` - (Admins only)  Displays a dropdown menu of event names stored in the database. When a user selects an event from the menu, an invitation for a selected event is created and an embed is sent to the channel. Buttons are displayed so members can indicate whether they are "attending", "can't go", or "maybe". When a button is clicked, it updates the responses database with the member's RSVP and updates the original embed to display the number of attendees. This message can be seen by all members so any member can RSVP.
+`/events-- modify` - (Admins only) Displays a dropdown menu of events stored in the database. When a user selects an event from the menu, the event details from the database is populated in an embed. Then, a second dropdown is displayed for the user to select a field to modify. The user may select event name, description, location, start date & time, or end date & time. The selection opens a modal (form) to prompt the user to enter new input for the selected field. 
+
+`/events-- invite` - (Admins only)  Displays a dropdown menu of events stored in the events database. When a user selects an event from the menu, an invitation for a selected event is created and an embed is sent to the channel. Buttons are displayed so members can indicate whether they are "attending", "can't go", or "maybe". When a button is clicked, it updates the responses database with the member's RSVP and updates the original embed to display the number of attendees. This message can be seen by all members so any member can RSVP.
+
+### Archive Commands:
+`/archive` - Displays a dropdown menu of events stored in the archive database. When a user selects an event from the menu, the event details from the database is populated in an embed.
+
+`/restore` - (Admins only) Displays a dropdown menu of events stored in the archive database. When a user selects an event from the menu, the corresponding event is moved from the archive database to the events database.
