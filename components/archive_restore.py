@@ -6,7 +6,7 @@ from matty_db import Database
 
 class RestoreEventEmbed(Embed):
     def __init__(self, event_name, description, location, start_date, start_time, end_date, end_time):
-        super().__init__(title="❗ Are you sure you want to `RESTORE` this event from the archive? ❗", description="", color=Color.dark_blue)
+        super().__init__(title="❗ Are you sure you want to `RESTORE` this event from the archive? ❗", description="", color=Color.dark_blue())
         self.add_field(name=" ", value=" ", inline=False)
         self.add_field(name=f"📅  `{event_name}`", value=description)
         self.add_field(name=" ", value=" ", inline=False)

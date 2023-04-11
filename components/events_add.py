@@ -19,7 +19,7 @@ class Modal1(ui.Modal, title="Add an Event (Page 1 of 2)"):
     
     async def on_submit(self, interaction: Interaction):
         embed = Embed(title="Is this event information is correct? (Page 1 of 2)", description="", color=discord.Color.green())
-        embed.add_field(name="`Event Name`", value=self.event_name, inline=False)
+        embed.add_field(name="Event Name", value=f"`{self.event_name}`", inline=False)
         embed.add_field(name="Description", value=self.description, inline=False)
         embed.add_field(name="📍 Location", value=self.location, inline=False)
         
@@ -66,11 +66,12 @@ class Modal2(ui.Modal, title="Add an Event (Page 2 of 2)"):
 
     async def on_submit(self, interaction: Interaction):
         embed2 = Embed(title="Is this event information correct? (Page 2 of 2)", description="", color=discord.Color.green())
-        
-        embed2.add_field(name="📅 Start date", value=self.start_date, inline=False)
-        embed2.add_field(name="⏰ Start time", value=self.start_time, inline=False)
-        embed2.add_field(name="📅 End date", value=self.end_date, inline=False)
-        embed2.add_field(name="⏰ End time", value=self.end_time, inline=False)
+        embed2.add_field(name="📅 Start date", value=self.start_date, inline=True)
+        embed2.add_field(name="⏰ Start time", value=self.start_time, inline=True)
+        embed2.add_field(name=" ", value=" ", inline=False)
+        embed2.add_field(name=" ", value=" ", inline=False)
+        embed2.add_field(name="📅 End date", value=self.end_date, inline=True)
+        embed2.add_field(name="⏰ End time", value=self.end_time, inline=True)
         view2 = Buttons2(self.event_name, self.description, self.location, self.start_date, self.start_time, self.end_date, self.end_time, interaction)
         await interaction.response.edit_message(embed=embed2, view=view2)
 
@@ -136,7 +137,7 @@ class Buttons3(ui.View):
         self.end_time = end_time
         self.interaction = interaction
         
-    @discord.ui.button(label="Add Event to Calendar", style=discord.ButtonStyle.green)
+    @discord.ui.button(label="Yes, add this event", style=discord.ButtonStyle.green)
     async def confirm(self, interaction: Interaction, button: ui.Button):
         server_id = interaction.guild_id
         creator = interaction.user.name
@@ -144,7 +145,7 @@ class Buttons3(ui.View):
         datecreated = timestamp.strftime(f"%m/%d/%Y")
 
         try:  
-            event_link, event_id = await GoogleCalendarEvents.AddToCalendar(self.event_name, self.location, self.description, self.start_date, self.start_time, self.end_date, self.end_time)
+            event_link, event_id = await GoogleCalendarEvents.AddToCalendar(self.event_name, self.description, self.location, self.start_date, self.start_time, self.end_date, self.end_time)
         
             sql = "INSERT INTO events_db(event_id, server_id, event_name, description, location, start_date, start_time, end_date, end_time, event_link, creator, datecreated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
             val = (event_id, server_id, self.event_name.value, self.description.value, self.location.value, self.start_date.value, self.start_time.value, self.end_date.value, self.end_time.value, event_link, creator, datecreated)
@@ -188,7 +189,7 @@ class Buttons3(ui.View):
             await interaction.response.edit_message(embed=embed5, view=self)
         
 
-    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red)
+    @discord.ui.button(label="No, cancel", style=discord.ButtonStyle.red)
     async def cancel(self, interaction: Interaction, button: ui.Button):
         embed = Embed(title="", description=f"Event was not created because the action was cancelled.", color = discord.Color.red())
         for child in self.children: #disables all buttons when one is pressed

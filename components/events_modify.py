@@ -17,7 +17,7 @@ class EventModifyDropdownMenu(ui.Select):
     def __init__(self, server_id):
         self.db = Database()
 
-        rows = self.db.query_fetch("SELECT event_name, event_id FROM events_db WHERE server_id = ?", (server_id,))
+        rows = self.db.query_fetch("SELECT event_name, event_id FROM events_db WHERE server_id = ? ORDER BY start_date ASC", (server_id,))
 
         if rows:
             options = [SelectOption(label=row[0], value=row[1]) for row in rows]
