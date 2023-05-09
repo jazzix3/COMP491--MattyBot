@@ -19,7 +19,7 @@ class Client(commands.Bot):
         intents.members = True
         intents.message_content = True
         super().__init__(command_prefix=commands.when_mentioned_or("!"), intents=intents) 
-        self.coglist = ['cogs.archivecommands', 'cogs.eventcommands', 'cogs.exampleDB', 'cogs.faqscommands']
+        self.coglist = ['cogs.archivecommands', 'cogs.eventcommands', 'cogs.exampleDB', 'cogs.faqscommands', 'cogs.pollscommands']
 
     async def setup_hook(self) -> None:
         for cog in self.coglist:
@@ -63,7 +63,7 @@ def CalendarSetup():
 
 
 dotenv.load_dotenv()
-TOKEN = os.getenv("DISCORD_BOT_TOKEN")
+TOKEN = os.getenv("TOKEN")
 
 db = Database()
 db.startup()    
