@@ -59,12 +59,12 @@ class ExampleDB(commands.GroupCog, name="test"):
             event_name = "FIFA 23 Tournament"
             description = "Kick it in the Games Room and compete against other Matadors in FIFA ‘23 tournaments this semester! These tournaments are a great way to have fun while also having the potential of scoring some awesome prizes!"
             location = "Games Room, University Student Union"
-            start_date = "2023-05-01"
+            start_date = "2023-06-01"
             start_time =  "17:00"
-            end_date = "2023-05-01"
+            end_date = "2023-06-01"
             end_time = "20:00"
             creator = "Jazzi"
-            datecreated = "4/2/2023"
+            datecreated = "5/2/2023"
             event_link, event_id = await GoogleCalendarEvents.AddToCalendar(event_name, description, location, start_date, start_time, end_date, end_time)
         
             sql = "INSERT INTO events_db(event_id, server_id, event_name, description, location, start_date, start_time, end_date, end_time, event_link, creator, datecreated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
@@ -75,12 +75,12 @@ class ExampleDB(commands.GroupCog, name="test"):
             event_name = "MataGame Night"
             description = "The University Student Union invites you to kick off the semester right at Matador Nights! Whether you want to dance the night away to awesome tunes provided by DJs, spruce up your Instagram feed with awe-inspiring photo ops or enjoy an amazing spread of FREE food—your perfect night starts here."
             location = "Games Room, University Student Union"
-            start_date = "2023-05-02"
+            start_date = "2023-06-02"
             start_time =  "17:00"
-            end_date = "2023-05-02"
+            end_date = "2023-06-02"
             end_time = "19:00"
             creator = "Jazzi"
-            datecreated = "4/3/2023"
+            datecreated = "5/3/2023"
             event_link, event_id = await GoogleCalendarEvents.AddToCalendar(event_name, description, location, start_date, start_time, end_date, end_time)
         
             sql = "INSERT INTO events_db(event_id, server_id, event_name, description, location, start_date, start_time, end_date, end_time, event_link, creator, datecreated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
@@ -91,12 +91,12 @@ class ExampleDB(commands.GroupCog, name="test"):
             event_name = "Super Smash Brothers Tournament"
             description = "The Games Room of the University Student Union invites players to fight their way to the top during the Super Smash Bros. Ultimate Tournament! Whether you’re a beginner entering your first tourney, or a seasoned wavedasher, everyone is welcome to battle it out on Nintendo Switch. Our first-place champions will go home with a $50 Amazon gift card, second will snag $25 Amazon gift card and third will walk away with a $15 Amazon gift card." 
             location = "Games Room, University Student Union"
-            start_date = "2023-05-03"
+            start_date = "2023-06-03"
             start_time =  "14:00"
-            end_date = "2023-05-03"
+            end_date = "2023-06-03"
             end_time = "18:00"
             creator = "Jazzi"
-            datecreated = "3/30/2023"
+            datecreated = "4/30/2023"
             event_link, event_id = await GoogleCalendarEvents.AddToCalendar(event_name, description, location, start_date, start_time, end_date, end_time)
         
             sql = "INSERT INTO events_db(event_id, server_id, event_name, description, location, start_date, start_time, end_date, end_time, event_link, creator, datecreated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
@@ -165,7 +165,7 @@ class ExampleDB(commands.GroupCog, name="test"):
             self.db.query_input(responsessql,val)
 
 
-            rows = self.db.query_fetch("SELECT event_id FROM events_db WHERE event_name = ?", ("Super Smash Bros. Ultimate Tournament",))
+            rows = self.db.query_fetch("SELECT event_id FROM events_db WHERE event_name = ?", ("Super Smash Brothers Tournament",))
             event_id= rows[0][0]
             val = (event_id, "Eevee", "accepted")
             self.db.query_input(responsessql,val)
