@@ -15,9 +15,11 @@ For new student members on the CSUN Esports club Discord server who need help na
   - Admins will update calendar for events, streams, etc.
   - Users have options to accept, decline, or respond tentatively to invitations
   
-- Commands for Mattybot to check statistics from a certain game such as:
-  - !rank to show user's current rank
-  - !playtime to show user's total hours played
+- ~~Commands for Mattybot to check statistics from a certain game such as:
+  - ~~!rank to show user's current rank
+  - ~~!playtime to show user's total hours played
+
+- Polling system
 
 ## Requirements
 - Set up a virtual environment:
