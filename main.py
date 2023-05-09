@@ -42,20 +42,20 @@ def CalendarSetup():
     creds = None
     SCOPES = ['https://www.googleapis.com/auth/calendar']
 
-    if os.path.exists('cal_token.json'):
-        creds = Credentials.from_authorized_user_file('cal_token.json', SCOPES)
 
+    if os.path.exists('token.json'):
+        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+    # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
-                'cal_credentials.json', SCOPES)
+                'credentials.json', SCOPES)
             creds = flow.run_local_server(port=0)
-
-        with open('cal_token.json', 'w') as token:
+        # Save the credentials for the next run
+        with open('token.json', 'w') as token:
             token.write(creds.to_json())
-
 
 
 
