@@ -43,6 +43,8 @@ pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-
 DISCORD_BOT_TOKEN=yourbottokengoeshere
 ```
 
+- Assign "MattyBotAdmin" role to users to allow admin permissions
+
 ## Available Commands
 ### FAQ Commands: 
 
