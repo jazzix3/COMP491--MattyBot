@@ -31,20 +31,6 @@ class Database():
             datecreated TEXT
             )
             '''
-        create_polls_table = '''
-            CREATE TABLE IF NOT EXISTS polls_db(
-            poll_id TEXT PRIMARY KEY,
-            server_id INTEGER,
-            poll_title TEXT,
-            description TEXT,
-            start_date TEXT,
-            start_time TEXT,
-            end_date TEXT,
-            end_time TEXT,
-            creator TEXT,
-            datecreated TEXT
-            )
-            '''
         create_responses_table = '''
             CREATE TABLE IF NOT EXISTS responses_db(
             response_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -53,15 +39,6 @@ class Database():
             response TEXT NOT NULL,
             FOREIGN KEY(event_id) REFERENCES events_db(event_id)
             FOREIGN KEY(event_id) REFERENCES archive_db(event_id)
-            )
-            '''
-        create_votes_table = '''
-            CREATE TABLE IF NOT EXISTS votes_db(
-            vote_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            poll_id INTEGER NOT NULL,
-            username TEXT NOT NULL,
-            vote TEXT NOT NULL,
-            FOREIGN KEY(poll_id) REFERENCES polls_db(poll_id)
             )
             '''
 
@@ -84,9 +61,7 @@ class Database():
 
         self.query(create_faqs_table)
         self.query(create_events_table)
-        self.query(create_polls_table)
         self.query(create_responses_table)
-        self.query(create_votes_table)
         self.query(create_archive_table)
         
     def query(self, query, *params):
