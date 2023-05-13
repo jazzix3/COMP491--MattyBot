@@ -19,7 +19,7 @@ class Client(commands.Bot):
         intents.members = True
         intents.message_content = True
         super().__init__(command_prefix=commands.when_mentioned_or("!"), intents=intents) 
-        self.coglist = ['cogs.archivecommands', 'cogs.eventcommands', 'cogs.exampleDB', 'cogs.faqscommands', 'cogs.pollscommands']
+        self.coglist = ['cogs.archivecommands', 'cogs.eventcommands', 'cogs.exampleDB', 'cogs.faqscommands']
 
     async def setup_hook(self) -> None:
         for cog in self.coglist:
@@ -33,7 +33,7 @@ class Client(commands.Bot):
         print(prfx + Style.NORMAL + " Number of cogs loaded: "  + Fore.YELLOW + str(len(self.coglist)) + Fore.RESET)
         #print(prfx + " Number of slash commands synced: " + Fore.YELLOW + str(len(synced)))
         CalendarSetup()
-        print(prfx + Style.NORMAL + " Logged into Google Calendar id: "  + Fore.YELLOW + "***(will add id later)***")
+        
             
 
 
@@ -63,7 +63,7 @@ def CalendarSetup():
 
 
 dotenv.load_dotenv()
-TOKEN = os.getenv("TOKEN")
+TOKEN = os.getenv("DISCORD_BOT_TOKEN")
 
 db = Database()
 db.startup()    
